@@ -1,5 +1,8 @@
 import requests
 
+from utils.data import Purchase
+from utils.data import Receipt
+
 
 class Nalog:
     """Реализация подключения к API Налоговой службы
@@ -76,15 +79,3 @@ class Nalog:
             receipt = Receipt()
         return receipt
 
-
-class Receipt:
-    items = []
-
-
-class Purchase:
-    def __init__(self, name: str, price: int, quantity: float, sum: int):
-        self.name: str = name
-        self.price: float = price / 100
-        self.quantity: float = quantity
-        self.sum: float = sum / 100
-        self.category: str = ""
