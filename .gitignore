@@ -151,7 +151,7 @@ cython_debug/
 [Ll]ocal
 [Ss]cripts
 pyvenv.cfg
-.venv
 pip-selfcheck.json
 
 .idea
+source/
