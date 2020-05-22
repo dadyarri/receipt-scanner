@@ -1,6 +1,9 @@
 class Receipt:
     items = []
 
+    def __str__(self):
+        return "\n".join([str(item) for item in self.items])
+
 
 class Purchase:
     def __init__(self, name: str, price: int, quantity: float, sum: int):
@@ -9,3 +12,6 @@ class Purchase:
         self.quantity: float = quantity
         self.sum: float = sum / 100
         self.category: str = ""
+
+    def __str__(self):
+        return f"{self.name} ({self.price}*{self.quantity} = {self.sum})"
