@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 
 from PIL import Image
 
+from nalog import Nalog
 from utils import scan_qr
 from utils.data import Purchase
 from utils.data import Receipt
@@ -33,3 +35,15 @@ if __name__ == '__main__':
                 price = float(item[2])
                 receipts[-1].items.append(Purchase(name=name, quantity=quantity,
                                                    price=price, sum=quantity * price))
+
+    if decoded:
+
+        nalog = Nalog(os.environ["phone"], os.environ["password"])
+
+        for receipt in decoded:
+            receipt_data = dict(
+                [tuple(j.replace("\n", "").split("=")) for j in receipt.split("&")]
+            )
+            receipt_data["s"] = receipt_data["s"].replace(".", "")
+
+            print(nalog.exist_receipt(**receipt_data))
