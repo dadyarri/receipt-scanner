@@ -6,7 +6,7 @@ class Receipt:
 
 
 class Purchase:
-    def __init__(self, name: str, price: int, quantity: float, sum: int):
+    def __init__(self, name: str, price: int, quantity: float, sum: int, **_):
         self.name: str = name
         self.price: float = price / 100
         self.quantity: float = quantity
