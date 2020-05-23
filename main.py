@@ -8,7 +8,7 @@ from utils import scan_qr
 from utils.data import Purchase
 from utils.data import Receipt
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     week = int(input("Номер недели: "))
     month = int(input("Номер месяца: "))
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     source_path = Path(f"source/{date}")
 
     decoded = []
-    receipts = []
+    receipt = Receipt()
 
     for file in source_path.rglob("*.png"):
         img = Image.open(file)
@@ -26,24 +26,27 @@ if __name__ == '__main__':
 
     txt = Path(source_path, "goods.txt")
     if txt.exists():
-        receipts.append(Receipt())
         with open(txt, "r") as file:
             for line in file.readlines():
                 item = line.split(":")
                 name = item[0]
                 quantity = float(item[1])
                 price = float(item[2])
-                receipts[-1].items.append(Purchase(name=name, quantity=quantity,
-                                                   price=price, sum=quantity * price))
+                receipt.items.append(
+                    Purchase(
+                        name=name, quantity=quantity, price=price, sum=quantity * price
+                    )
+                )
 
     if decoded:
 
         nalog = Nalog(os.environ["phone"], os.environ["password"])
 
-        for receipt in decoded:
+        for rec in decoded:
             receipt_data = dict(
-                [tuple(j.replace("\n", "").split("=")) for j in receipt.split("&")]
+                [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
             )
             receipt_data["s"] = receipt_data["s"].replace(".", "")
 
-            print(nalog.exist_receipt(**receipt_data))
+            if nalog.exist_receipt(**receipt_data):
+                receipt.items += nalog.get_full_data_of_receipt(**receipt_data)
