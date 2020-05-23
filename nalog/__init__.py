@@ -47,7 +47,7 @@ class Nalog:
         if query.status_code == 406:
             return False
 
-    def get_full_data_of_receipt(self, fn, i, fp, *_):
+    def get_full_data_of_receipt(self, fn, i, fp, **_):
         """Получение подробной информации о чеке
         Arguments:
             fn: Фискальный номер. 16-значное число
