@@ -67,15 +67,15 @@ class Nalog:
 
         if query.status_code == 406:
             print("Чек не найден")
-            receipt = Receipt()
+            receipt = []
         elif query.status_code == 202:
             print("Существование чека не было проверено")
-            receipt = Receipt()
+            receipt = []
         elif query.status_code == 200:
-            receipt = Receipt()
+            receipt = []
             for item in query.json()["document"]["receipt"]["items"]:
-                receipt.items.append(Purchase(**item))
+                receipt.append(Purchase(**item))
         else:
-            receipt = Receipt()
+            receipt = []
         return receipt
 
