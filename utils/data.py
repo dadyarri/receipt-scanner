@@ -4,6 +4,9 @@ class Receipt:
     def __str__(self):
         return "\n".join([str(item) for item in self.items])
 
+    def __len__(self):
+        return len(self.items)
+
 
 class Purchase:
     def __init__(self, name: str, price: int, quantity: float, sum: int, **_):
