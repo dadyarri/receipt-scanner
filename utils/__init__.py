@@ -1,5 +1,6 @@
 import re
 from math import ceil
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -85,3 +86,13 @@ def get_summ_of_purchases(receipt: list):
     for purchase in receipt:
         summ += purchase.sum
     return summ
+
+
+def get_previous_date(week: int, month: int):
+    if n := week - 1:
+        return f"{n}-0{month}"
+    path = Path("source")
+    weeks = []
+    for p in path.glob("*"):
+        weeks.append(int(str(p).replace("source/", "").split("-")[0]))
+    return f"{max(weeks)}-0{month - 1}"
