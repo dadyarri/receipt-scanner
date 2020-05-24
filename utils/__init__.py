@@ -1,10 +1,10 @@
+import re
 from math import ceil
 
+import pandas as pd
+import yaml
 from PIL import Image
 from pyzbar.pyzbar import decode
-
-import yaml
-import re
 
 
 def scan_qr(img: Image):
@@ -32,14 +32,14 @@ def find_whole_word(word, string):
     return re.compile(r"\b({0})\b".format(word)).search(string)
 
 
-def sort_purchases(receipt: list):
+def sort_purchases(receipt: list) -> pd.DataFrame:
     """
     Сортирует покупки по категориям
     Args:
         receipt: Список покупок
 
     Returns:
-        Dict[str, float]: Упорядоченный по сумме трат словарь с категориями
+        DataFrame: Упорядоченный по сумме трат датафрейм с категориями
     """
     categories = {}
     products = yaml.full_load(open("products.yml", "r"))
@@ -55,4 +55,7 @@ def sort_purchases(receipt: list):
 
     categories = {k: v for k, v in sorted(categories.items(), key=lambda item: item[1])}
 
-    return categories
+    df = pd.DataFrame(
+        {"category": list(categories.keys()), "value": list(categories.values())}
+    )
+    return df
