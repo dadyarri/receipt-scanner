@@ -59,3 +59,21 @@ def sort_purchases(receipt: list) -> pd.DataFrame:
         {"category": list(categories.keys()), "value": list(categories.values())}
     )
     return df
+
+
+def generate_colors(amount: int):
+    """Генерирует список цветов в шестнадцатеричном формате в заданном количестве из файла colors.yml
+
+    Arguments:
+        amount: Количество цветов
+
+    Returns:
+        List[str]: Набор сгенерированных цветов
+    """
+    result = []
+    colors = yaml.full_load(open("colors.yml", "r"))
+
+    for i in range(amount):
+        result.append(f"{colors[i]}")
+
+    return result
