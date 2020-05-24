@@ -5,6 +5,7 @@ from PIL import Image
 
 from nalog import Nalog
 from utils import scan_qr
+from utils import sort_purchases
 from utils.data import Purchase
 
 if __name__ == "__main__":
@@ -49,3 +50,11 @@ if __name__ == "__main__":
 
             if nalog.exist_receipt(**receipt_data):
                 receipt += nalog.get_full_data_of_receipt(**receipt_data)
+
+    for p in receipt:
+        print(p)
+
+    categories = sort_purchases(receipt)
+
+    for cat, s in categories.items():
+        print(cat, s, round((s / sum(categories.values())) * 100, 2), "%")
