@@ -1,6 +1,6 @@
 class Purchase:
     def __init__(self, name: str, price: int, quantity: float, sum: int, **_):
-        self.name: str = name
+        self.name: str = name.capitalize()
         self.price: float = price / 100
         self.quantity: float = quantity
         self.sum: float = sum / 100
