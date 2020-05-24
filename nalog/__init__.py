@@ -1,7 +1,6 @@
 import requests
 
 from utils.data import Purchase
-from utils.data import Receipt
 
 
 class Nalog:
@@ -78,4 +77,3 @@ class Nalog:
         else:
             receipt = []
         return receipt
-

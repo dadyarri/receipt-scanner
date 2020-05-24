@@ -6,7 +6,6 @@ from PIL import Image
 from nalog import Nalog
 from utils import scan_qr
 from utils.data import Purchase
-from utils.data import Receipt
 
 if __name__ == "__main__":
     week = int(input("Номер недели: "))
@@ -17,7 +16,7 @@ if __name__ == "__main__":
     source_path = Path(f"source/{date}")
 
     decoded = []
-    receipt = Receipt()
+    receipt = []
 
     for file in source_path.rglob("*.png"):
         img = Image.open(file)
@@ -32,7 +31,7 @@ if __name__ == "__main__":
                 name = item[0]
                 quantity = float(item[1])
                 price = float(item[2])
-                receipt.items.append(
+                receipt.append(
                     Purchase(
                         name=name, quantity=quantity, price=price, sum=quantity * price
                     )
@@ -49,4 +48,4 @@ if __name__ == "__main__":
             receipt_data["s"] = receipt_data["s"].replace(".", "")
 
             if nalog.exist_receipt(**receipt_data):
-                receipt.items += nalog.get_full_data_of_receipt(**receipt_data)
+                receipt += nalog.get_full_data_of_receipt(**receipt_data)
