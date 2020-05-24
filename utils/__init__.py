@@ -77,3 +77,10 @@ def generate_colors(amount: int):
         result.append(f"{colors[i]}")
 
     return result
+
+
+def get_summ_of_purchases(receipt: list):
+    summ = 0
+    for purchase in receipt:
+        summ += purchase.sum
+    return summ
