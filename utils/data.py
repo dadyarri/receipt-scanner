@@ -7,4 +7,6 @@ class Purchase:
         self.category: str = ""
 
     def __str__(self):
-        return f"{self.name} ({self.price}*{self.quantity} = {self.sum})"
+        return (
+            f"{self.name} [{self.category}] ({self.price}*{self.quantity} = {self.sum})"
+        )
