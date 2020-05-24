@@ -49,6 +49,7 @@ def sort_purchases(receipt: list) -> pd.DataFrame:
                 if k not in categories:
                     categories[k] = 0.0
                 categories[k] += ceil(purchase.sum)
+                purchase.category = k
                 break
         else:
             print(purchase)
