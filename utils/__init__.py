@@ -1,7 +1,10 @@
-from pathlib import Path
+from math import ceil
 
 from PIL import Image
 from pyzbar.pyzbar import decode
+
+import yaml
+import re
 
 
 def scan_qr(img: Image):
@@ -20,3 +23,36 @@ def scan_qr(img: Image):
     return ""
 
 
+def find_whole_word(word, string):
+    """Ищет в строке шаблон, отделённый пробелами
+    Arguments:
+        word: Шаблон для поиска
+        string: Строка, где искать
+    """
+    return re.compile(r"\b({0})\b".format(word)).search(string)
+
+
+def sort_purchases(receipt: list):
+    """
+    Сортирует покупки по категориям
+    Args:
+        receipt: Список покупок
+
+    Returns:
+        Dict[str, float]: Упорядоченный по сумме трат словарь с категориями
+    """
+    categories = {}
+    products = yaml.full_load(open("products.yml", "r"))
+    for purchase in receipt:
+        for k, v in products.items():
+            if any(find_whole_word(i, purchase.name.lower()) for i in v):
+                if k not in categories:
+                    categories[k] = 0.0
+                categories[k] += ceil(purchase.sum)
+                break
+        else:
+            print(purchase)
+
+    categories = {k: v for k, v in sorted(categories.items(), key=lambda item: item[1])}
+
+    return categories
