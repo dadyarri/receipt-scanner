@@ -56,12 +56,12 @@ if __name__ == "__main__":
             if nalog.exist_receipt(**receipt_data):
                 receipt += nalog.get_full_data_of_receipt(**receipt_data)
 
+    categories = sort_purchases(receipt)
+
     for p in receipt:
         print(p)
 
     print("-----------")
-
-    categories = sort_purchases(receipt)
 
     for index, row in categories.iterrows():
         print(
