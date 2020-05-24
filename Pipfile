@@ -11,6 +11,7 @@ pillow = "*"
 pyzbar = "*"
 pyyaml = "*"
 matplotlib = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.8"
