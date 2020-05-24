@@ -12,6 +12,8 @@ if __name__ == "__main__":
     week = int(input("Номер недели: "))
     month = int(input("Номер месяца: "))
 
+    print("-----------")
+
     date = f"{week}-0{month}"
 
     source_path = Path(f"source/{date}")
@@ -54,7 +56,14 @@ if __name__ == "__main__":
     for p in receipt:
         print(p)
 
+    print("-----------")
+
     categories = sort_purchases(receipt)
 
     for cat, s in categories.items():
-        print(cat, s, round((s / sum(categories.values())) * 100, 2), "%")
+        print(
+            f"{cat.capitalize()}: {s} ("
+            f"{round((s / sum(categories.values())) * 100, 2)}%)"
+        )
+
+    print("-----------")
