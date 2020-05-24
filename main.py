@@ -60,10 +60,10 @@ if __name__ == "__main__":
 
     categories = sort_purchases(receipt)
 
-    for cat, s in categories.items():
+    for index, row in categories.iterrows():
         print(
-            f"{cat.capitalize()}: {s} ("
-            f"{round((s / sum(categories.values())) * 100, 2)}%)"
+            f"{row.category.capitalize()}: {row.value} ("
+            f"{round((row.value / sum(categories.value)) * 100, 2)}%)"
         )
 
     print("-----------")
