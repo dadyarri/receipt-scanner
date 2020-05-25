@@ -35,11 +35,8 @@ if __name__ == "__main__":
 
     print("-----------")
 
-    for index, row in categories.iterrows():
-        print(
-            f"{row.category.capitalize()}: {row.value} ("
-            f"{round((row.value / sum(categories.value)) * 100, 2)}%)"
-        )
+    for item in get_legend(categories, diff):
+        print(item)
 
     print("-----------")
 
@@ -79,5 +76,13 @@ if __name__ == "__main__":
     )
     plt.axis("equal")
     plt.tight_layout()
+
+    try:
+        plt.savefig(
+            fname=f"/run/user/1000/d2f8b09b693b47c4/primary/DCIM/Camera/figure_{date}.png",
+        )
+    except FileNotFoundError:
+        print()
+        print("Не могу подключиться к целевому устройству")
 
     plt.show()
