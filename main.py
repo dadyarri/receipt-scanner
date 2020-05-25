@@ -1,15 +1,14 @@
-import os
 from pathlib import Path
 
-from PIL import Image
-
-from nalog import Nalog
-from utils import generate_colors
-from utils import get_summ_of_purchases
-from utils import scan_qr
-from utils import sort_purchases
-from utils.data import Purchase
 from matplotlib import pyplot as plt
+
+from utils import collect_data
+from utils import generate_colors
+from utils import get_difference_of_dataframes
+from utils import get_legend
+from utils import get_previous_date
+from utils import get_summ_of_purchases
+from utils import sort_purchases
 
 if __name__ == "__main__":
     week = int(input("Номер недели: "))
@@ -18,45 +17,18 @@ if __name__ == "__main__":
     print("-----------")
 
     date = f"{week}-0{month}"
+    old_date = get_previous_date(week, month)
 
     source_path = Path(f"source/{date}")
+    old_source_path = Path(f"source/{old_date}")
 
-    decoded = []
-    receipt = []
+    old_receipt = collect_data(old_source_path)
+    receipt = collect_data(source_path)
 
-    for file in source_path.rglob("*.png"):
-        img = Image.open(file)
-        if qr := scan_qr(img):
-            decoded.append(qr)
-
-    txt = Path(source_path, "goods.txt")
-    if txt.exists():
-        with open(txt, "r") as file:
-            for line in file.readlines():
-                item = line.split(":")
-                name = item[0]
-                quantity = float(item[1])
-                price = float(item[2])
-                receipt.append(
-                    Purchase(
-                        name=name, quantity=quantity, price=price, sum=quantity * price
-                    )
-                )
-
-    if decoded:
-
-        nalog = Nalog(os.environ["phone"], os.environ["password"])
-
-        for rec in decoded:
-            receipt_data = dict(
-                [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
-            )
-            receipt_data["s"] = receipt_data["s"].replace(".", "")
-
-            if nalog.exist_receipt(**receipt_data):
-                receipt += nalog.get_full_data_of_receipt(**receipt_data)
-
+    old_categories = sort_purchases(old_receipt)
     categories = sort_purchases(receipt)
+
+    diff = get_difference_of_dataframes(old_categories, categories)
 
     for p in receipt:
         print(p)
@@ -103,12 +75,7 @@ if __name__ == "__main__":
         x=1, y=-1.5, s=text_of_summ,
     )
     plt.legend(
-        labels=[
-            f"{value.category.capitalize()} {round(value.value)} руб. "
-            f"({round(value.value / sum(categories.value) * 100, 2)}%)"
-            for index, value in categories.iterrows()
-        ],
-        bbox_to_anchor=(1, 0.8),
+        labels=get_legend(categories, diff), bbox_to_anchor=(1, 0.8),
     )
     plt.axis("equal")
     plt.tight_layout()

@@ -1,3 +1,4 @@
+import os
 import re
 from math import ceil
 from pathlib import Path
@@ -6,6 +7,9 @@ import pandas as pd
 import yaml
 from PIL import Image
 from pyzbar.pyzbar import decode
+
+from nalog import Nalog
+from utils.data import Purchase
 
 
 def scan_qr(img: Image):
@@ -59,7 +63,7 @@ def sort_purchases(receipt: list) -> pd.DataFrame:
 
     df = pd.DataFrame(
         {"category": list(categories.keys()), "value": list(categories.values())}
-    )
+    ).sort_values(by="value")
     return df
 
 
@@ -96,3 +100,72 @@ def get_previous_date(week: int, month: int):
     for p in path.glob("*"):
         weeks.append(int(str(p).replace("source/", "").split("-")[0]))
     return f"{max(weeks)}-0{month - 1}"
+
+
+def collect_data(path):
+
+    decoded = []
+    receipt = []
+
+    for file in path.rglob("*.png"):
+        img = Image.open(file)
+        if qr := scan_qr(img):
+            decoded.append(qr)
+
+    txt = Path(path, "goods.txt")
+    if txt.exists():
+        with open(txt, "r") as file:
+            for line in file.readlines():
+                item = line.split(":")
+                name = item[0]
+                quantity = float(item[1])
+                price = float(item[2])
+                receipt.append(
+                    Purchase(
+                        name=name, quantity=quantity, price=price, sum=quantity * price
+                    )
+                )
+
+    if decoded:
+
+        nalog = Nalog(os.environ["phone"], os.environ["password"])
+
+        for rec in decoded:
+            receipt_data = dict(
+                [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
+            )
+            receipt_data["s"] = receipt_data["s"].replace(".", "")
+
+            if nalog.exist_receipt(**receipt_data):
+                receipt += nalog.get_full_data_of_receipt(**receipt_data)
+
+    return receipt
+
+
+def get_difference_of_dataframes(old_frame: pd.DataFrame, new_frame: pd.DataFrame):
+    df = old_frame.merge(new_frame, "left", on="category")
+    df.columns = ["category", "old", "new"]
+    df = df.dropna()
+    df["delta"] = df["new"] - df["old"]
+    return df
+
+
+def get_legend(categories, diff):
+
+    legend = []
+    for index, value in categories.iterrows():
+        title = value.category
+        summ = round(value.value)
+        percentage = round(value.value / sum(categories.value) * 100, 2)
+        item = diff.loc[diff["category"] == title]
+        if len(item.index) > 0:
+            d = int(item["delta"].item())
+            if d > 0:
+                delta = f" +{d} руб."
+            else:
+                delta = f" {d} руб."
+        else:
+            delta = ""
+
+        legend.append(f"{title.capitalize()} {summ} руб. ({percentage}%){delta}")
+    return legend
