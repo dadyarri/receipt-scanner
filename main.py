@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     print("-----------")
 
-    date = f"{week}-0{month}"
+    date = f"{week}-{month}"
     old_date = get_previous_date(week, month)
 
     source_path = Path(f"source/{date}")
