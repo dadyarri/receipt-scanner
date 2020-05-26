@@ -6,6 +6,7 @@ from utils import collect_data
 from utils import generate_colors
 from utils import get_difference_of_dataframes
 from utils import get_legend
+from utils import get_name_of_month
 from utils import get_previous_date
 from utils import get_summ_of_purchases
 from utils import sort_purchases
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
 
-    month_word = "мая"
+    month_word = get_name_of_month(month)
 
     plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
     plt.text(

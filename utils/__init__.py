@@ -102,6 +102,13 @@ def get_previous_date(week: int, month: int):
     return f"{max(weeks)}-{month - 1}"
 
 
+def get_name_of_month(number):
+    months = "|января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря".split(
+        "|"
+    )
+    return months[number]
+
+
 def collect_data(path):
 
     decoded = []
