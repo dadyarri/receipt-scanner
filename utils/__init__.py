@@ -10,7 +10,6 @@ from PIL import Image
 from pyzbar.pyzbar import decode
 
 from nalog import Nalog
-from utils.data import Purchase
 
 
 def scan_qr(img: Image):
