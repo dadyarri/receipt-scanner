@@ -38,7 +38,7 @@ def find_whole_word(word, string):
     return re.compile(r"\b({0})\b".format(word)).search(string)
 
 
-def sort_purchases(receipt: list) -> pd.DataFrame:
+def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     """
     Сортирует покупки по категориям
     Args:
@@ -49,16 +49,17 @@ def sort_purchases(receipt: list) -> pd.DataFrame:
     """
     categories = {}
     products = yaml.full_load(open("products.yml", "r"))
-    for purchase in receipt:
+    receipt.category = receipt.category.astype(str)
+    for ind, purchase in receipt.iterrows():
         for k, v in products.items():
-            if any(find_whole_word(i, purchase.name.lower()) for i in v):
+            if any(find_whole_word(i, purchase["name"].lower()) for i in v):
                 if k not in categories:
                     categories[k] = 0.0
-                categories[k] += ceil(purchase.sum)
-                purchase.category = k
+                categories[k] += ceil(purchase["sum"])
+                receipt.at[ind, "category"] = k
                 break
         else:
-            print(purchase)
+            print(f"* {purchase['name']}")
 
     categories = {k: v for k, v in sorted(categories.items(), key=lambda item: item[1])}
 
@@ -86,10 +87,10 @@ def generate_colors(amount: int):
     return result
 
 
-def get_summ_of_purchases(receipt: list):
+def get_summ_of_purchases(receipt: pd.DataFrame):
     summ = 0
-    for purchase in receipt:
-        summ += purchase.sum
+    for ind, purchase in receipt.iterrows():
+        summ += purchase["sum"]
     return summ
 
 
@@ -113,7 +114,7 @@ def get_name_of_month(number):
 def collect_data(path):
 
     decoded = []
-    receipt = []
+    receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
 
     for file in path.rglob("*.png"):
         img = Image.open(file)
@@ -128,10 +129,14 @@ def collect_data(path):
                 name = line[0]
                 quantity = float(line[1])
                 price = float(line[2])
-                receipt.append(
-                    Purchase(
-                        name=name, quantity=quantity, price=price, sum=quantity * price
-                    )
+                receipt = receipt.append(
+                    {
+                        "name": name,
+                        "quantity": quantity,
+                        "price": price / 100,
+                        "sum": (quantity * price) / 100,
+                    },
+                    ignore_index=True,
                 )
 
     if decoded:
@@ -145,8 +150,9 @@ def collect_data(path):
             receipt_data["s"] = receipt_data["s"].replace(".", "")
 
             if nalog.exist_receipt(**receipt_data):
-                receipt += nalog.get_full_data_of_receipt(**receipt_data)
-
+                receipt = receipt.append(
+                    nalog.get_full_data_of_receipt(**receipt_data), ignore_index=True
+                )
     return receipt
 
 

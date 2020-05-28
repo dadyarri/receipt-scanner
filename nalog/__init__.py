@@ -1,7 +1,5 @@
 import requests
 
-from utils.data import Purchase
-
 
 class Nalog:
     """Реализация подключения к API Налоговой службы
@@ -73,7 +71,9 @@ class Nalog:
         elif query.status_code == 200:
             receipt = []
             for item in query.json()["document"]["receipt"]["items"]:
-                receipt.append(Purchase(**item))
+                item["price"] /= 100
+                item["sum"] /= 100
+                receipt.append(item)
         else:
             receipt = []
         return receipt

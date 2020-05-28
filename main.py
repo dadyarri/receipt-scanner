@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from matplotlib import pyplot as plt
+from tabulate import tabulate
 
 import utils
 
@@ -24,8 +25,7 @@ if __name__ == "__main__":
 
     diff = utils.get_difference_of_dataframes(old_categories, categories)
 
-    for p in receipt:
-        print(p)
+    print(tabulate(receipt, headers="keys", tablefmt="psql"))
 
     print("-----------")
 
