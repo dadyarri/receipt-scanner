@@ -2,14 +2,7 @@ from pathlib import Path
 
 from matplotlib import pyplot as plt
 
-from utils import collect_data
-from utils import generate_colors
-from utils import get_difference_of_dataframes
-from utils import get_legend
-from utils import get_name_of_month
-from utils import get_previous_date
-from utils import get_summ_of_purchases
-from utils import sort_purchases
+import utils
 
 if __name__ == "__main__":
     week = int(input("Номер недели: "))
@@ -18,33 +11,32 @@ if __name__ == "__main__":
     print("-----------")
 
     date = f"{week}-{month}"
-    old_date = get_previous_date(week, month)
+    old_date = utils.get_previous_date(week, month)
 
     source_path = Path(f"source/{date}")
     old_source_path = Path(f"source/{old_date}")
 
-    old_receipt = collect_data(old_source_path)
-    receipt = collect_data(source_path)
+    old_receipt = utils.collect_data(old_source_path)
+    receipt = utils.collect_data(source_path)
 
-    old_categories = sort_purchases(old_receipt)
-    categories = sort_purchases(receipt)
+    old_categories = utils.sort_purchases(old_receipt)
+    categories = utils.sort_purchases(receipt)
 
-    diff = get_difference_of_dataframes(old_categories, categories)
+    diff = utils.get_difference_of_dataframes(old_categories, categories)
 
     for p in receipt:
         print(p)
 
     print("-----------")
 
-    for item in get_legend(categories, diff):
+    for item in utils.get_legend(categories, diff):
         print(item)
 
     print("-----------")
 
-    if round(get_summ_of_purchases(receipt)) > sum(categories.value):
+    if (summ := round(utils.get_summ_of_purchases(receipt))) > sum(categories.value):
         text_of_summ = (
-            f"Сумма покупок: {round(sum(categories.value))} / "
-            f"{round(get_summ_of_purchases(receipt))} руб."
+            f"Сумма покупок: {round(sum(categories.value))} / " f"{summ} руб."
         )
     else:
         text_of_summ = f"Сумма покупок: {round(sum(categories.value))} руб."
@@ -52,7 +44,7 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots()
     ax1.pie(
         categories.value,
-        colors=generate_colors(len(categories)),
+        colors=utils.generate_colors(len(categories)),
         startangle=90,
         pctdistance=0.9,
         labeldistance=None,
@@ -66,14 +58,14 @@ if __name__ == "__main__":
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
 
-    month_word = get_name_of_month(month)
+    month_word = utils.get_name_of_month(month)
 
     plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
     plt.text(
         x=1, y=-1.5, s=text_of_summ,
     )
     plt.legend(
-        labels=get_legend(categories, diff), bbox_to_anchor=(1, 0.8),
+        labels=utils.get_legend(categories, diff), bbox_to_anchor=(1, 0.8),
     )
     plt.axis("equal")
     plt.tight_layout()
