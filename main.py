@@ -6,8 +6,17 @@ from tabulate import tabulate
 import utils
 
 if __name__ == "__main__":
-    week = int(input("Номер недели: "))
-    month = int(input("Номер месяца: "))
+    week = ""
+    month = ""
+
+    while not week:
+        week = input("Номер недели: ")
+
+    while not month:
+        month = input("Номер месяца: ")
+
+    week = int(week)
+    month = int(month)
 
     print("-----------")
 
