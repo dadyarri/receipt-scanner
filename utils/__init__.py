@@ -1,3 +1,4 @@
+import csv
 import os
 import re
 from math import ceil
@@ -119,14 +120,14 @@ def collect_data(path):
         if qr := scan_qr(img):
             decoded.append(qr)
 
-    txt = Path(path, "goods.txt")
+    txt = Path(path, "goods.csv")
     if txt.exists():
         with open(txt, "r") as file:
-            for line in file.readlines():
-                item = line.split(":")
-                name = item[0]
-                quantity = float(item[1])
-                price = float(item[2])
+            reader = csv.reader(file)
+            for line in reader:
+                name = line[0]
+                quantity = float(line[1])
+                price = float(line[2])
                 receipt.append(
                     Purchase(
                         name=name, quantity=quantity, price=price, sum=quantity * price
