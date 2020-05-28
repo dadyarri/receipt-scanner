@@ -12,6 +12,7 @@ pyzbar = "*"
 pyyaml = "*"
 matplotlib = "*"
 pandas = "*"
+tabulate = "*"
 
 [requires]
 python_version = "3.8"
