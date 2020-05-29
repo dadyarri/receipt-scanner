@@ -116,6 +116,8 @@ def collect_data(path):
         img = Image.open(file)
         if qr := scan_qr(img):
             decoded.append(qr)
+        else:
+            print(f"Невозможно прочесть {file}")
 
     txt = Path(path, "goods.csv")
     if txt.exists():
