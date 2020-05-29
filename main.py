@@ -29,6 +29,9 @@ if __name__ == "__main__":
     old_receipt = utils.collect_data(old_source_path)
     receipt = utils.collect_data(source_path)
 
+    old_receipt = old_receipt[["name", "quantity", "price", "sum"]]
+    receipt = receipt[["name", "quantity", "price", "sum"]]
+
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
 
