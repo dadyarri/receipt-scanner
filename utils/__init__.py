@@ -46,26 +46,23 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame: Упорядоченный по сумме трат датафрейм с категориями
     """
-    categories = {}
+    categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
-    receipt.category = receipt.category.astype(str)
     for ind, purchase in receipt.iterrows():
         for k, v in products.items():
             if any(find_whole_word(i, purchase["name"].lower()) for i in v):
-                if k not in categories:
-                    categories[k] = 0.0
-                categories[k] += ceil(purchase["sum"])
+                if categories[categories["category"].str.contains(k)].empty:
+                    categories = categories.append(
+                        {"category": k, "value": 0.0}, ignore_index=True
+                    )
+                categories.loc[categories["category"] == k, "value"] += ceil(
+                    purchase["sum"]
+                )
                 receipt.at[ind, "category"] = k
                 break
         else:
             print(f"* {purchase['name']}")
-
-    categories = {k: v for k, v in sorted(categories.items(), key=lambda item: item[1])}
-
-    df = pd.DataFrame(
-        {"category": list(categories.keys()), "value": list(categories.values())}
-    ).sort_values(by="value")
-    return df
+    return categories.sort_values(by="value")
 
 
 def generate_colors(amount: int):
