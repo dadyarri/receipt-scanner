@@ -165,6 +165,8 @@ def get_difference_of_dataframes(old_frame: pd.DataFrame, new_frame: pd.DataFram
 def get_legend(categories, diff):
 
     legend = []
+    colors = []
+    products = yaml.full_load(open("products.yml", "r"))
     for index, value in categories.iterrows():
         title = value.category
         summ = round(value.value)
@@ -180,4 +182,5 @@ def get_legend(categories, diff):
             delta = ""
 
         legend.append(f"{title.capitalize()} {summ} руб. ({percentage}%){delta}")
-    return legend
+        colors.append(products[title][-1])
+    return legend, colors
