@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     print("-----------")
 
-    for item in utils.get_legend(categories, diff):
+    for item in utils.get_legend(categories, diff)[0]:
         print(item)
 
     print("-----------")
@@ -53,10 +53,12 @@ if __name__ == "__main__":
     else:
         text_of_summ = f"Сумма покупок: {round(sum(categories.value))} руб."
 
+    legend, colors = utils.get_legend(categories, diff)
+
     fig1, ax1 = plt.subplots()
     ax1.pie(
         categories.value,
-        colors=utils.generate_colors(len(categories)),
+        colors=colors,
         startangle=90,
         pctdistance=0.9,
         labeldistance=None,
@@ -77,7 +79,7 @@ if __name__ == "__main__":
         x=1, y=-1.5, s=text_of_summ,
     )
     plt.legend(
-        labels=utils.get_legend(categories, diff), bbox_to_anchor=(1, 0.8),
+        labels=legend, bbox_to_anchor=(1, 0.8),
     )
     plt.axis("equal")
     plt.tight_layout()
