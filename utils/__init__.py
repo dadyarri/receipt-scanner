@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 from PIL import Image
 from pyzbar.pyzbar import decode
+from matplotlib import  rc
 
 from nalog import Nalog
 
@@ -151,7 +152,7 @@ def get_legend(categories, diff):
     products = yaml.full_load(open("products.yml", "r"))
     for index, value in categories.iterrows():
         title = value.category
-        summ = round(value.value)
+        summ = r" $\bf{" + str(round(value.value)) + "  руб.}$"
         percentage = round(value.value / sum(categories.value) * 100, 2)
         item = diff.loc[diff["category"] == title]
         if len(item.index) > 0:
@@ -163,6 +164,6 @@ def get_legend(categories, diff):
         else:
             delta = ""
 
-        legend.append(f"{title.capitalize()} {summ} руб. ({percentage}%){delta}")
+        legend.append(f"{title.capitalize()} {summ} ({percentage}%){delta}")
         colors.append(products[title][-1])
     return legend, colors
