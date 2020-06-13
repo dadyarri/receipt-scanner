@@ -8,7 +8,6 @@ import pandas as pd
 import yaml
 from PIL import Image
 from pyzbar.pyzbar import decode
-from matplotlib import  rc
 
 from nalog import Nalog
 
@@ -94,6 +93,11 @@ def collect_data(path):
 
     decoded = []
     receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
+
+    for file in path.rglob("*.jpg"):
+        img = Image.open(file)
+        img.save(str(file)[:-3] + "png")
+        file.unlink()
 
     for file in path.rglob("*.png"):
         img = Image.open(file)
