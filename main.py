@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
     plt.text(
-        x=1, y=-1.5, s=text_of_summ,
+        x=1, y=1.5, s=text_of_summ,
     )
     plt.legend(
         labels=legend, bbox_to_anchor=(1, 0.8),
