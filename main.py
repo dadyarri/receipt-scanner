@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     ax1.axis("off")
 
-    centre_circle = plt.Circle((0, 0), 0.8, fc="white")
+    centre_circle = plt.Circle((0, 0), 0.85, fc="white")
     fig = plt.gcf()
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
