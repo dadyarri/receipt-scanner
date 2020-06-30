@@ -26,20 +26,28 @@ if __name__ == "__main__":
     source_path = Path(f"source/{date}")
     old_source_path = Path(f"source/{old_date}")
 
+    print("Сбор данных...")
+
     old_receipt = utils.collect_data(old_source_path)
     receipt = utils.collect_data(source_path)
 
     old_receipt = old_receipt[["name", "quantity", "price", "sum"]]
     receipt = receipt[["name", "quantity", "price", "sum"]]
 
+    print("Сортировка покупок...")
+
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
+
+    print("Вычисление разницы между неделями...")
 
     diff = utils.get_difference_of_dataframes(old_categories, categories)
 
     print(tabulate(receipt, headers="keys", tablefmt="psql"))
 
     print("-----------")
+
+    print("Построение диаграммы...")
 
     for item in utils.get_legend(categories, diff)[0]:
         print(item)
