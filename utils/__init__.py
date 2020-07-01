@@ -28,15 +28,6 @@ def scan_qr(img: Image):
     return ""
 
 
-def find_whole_word(word, string):
-    """Ищет в строке шаблон, отделённый пробелами
-    Arguments:
-        word: Шаблон для поиска
-        string: Строка, где искать
-    """
-    return re.compile(r"\b({0})\b".format(word)).search(string)
-
-
 def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     """
     Сортирует покупки по категориям
