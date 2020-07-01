@@ -48,17 +48,24 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     """
     categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
+    found = False
     for ind, purchase in receipt.iterrows():
-        for k, v in products.items():
-            if any(find_whole_word(i, purchase["name"].lower()) for i in v):
-                if categories[categories["category"].str.contains(k)].empty:
-                    categories = categories.append(
-                        {"category": k, "value": 0.0}, ignore_index=True
+        for category, filters in products.items():
+            for fltr in filters[:-1]:
+                matches = re.fullmatch(rf".*\b({fltr})\b.*", purchase["name"], re.I)
+                if matches is not None:
+                    if categories[categories["category"].str.contains(category)].empty:
+                        categories = categories.append(
+                            {"category": category, "value": 0.0}, ignore_index=True
+                        )
+                    categories.loc[categories["category"] == category, "value"] += ceil(
+                        purchase["sum"]
                     )
-                categories.loc[categories["category"] == k, "value"] += ceil(
-                    purchase["sum"]
-                )
-                receipt.at[ind, "category"] = k
+                    receipt.at[ind, "category"] = category
+                    found = True
+                    break
+            if found:
+                found = False
                 break
         else:
             print(f"* {purchase['name']}")
