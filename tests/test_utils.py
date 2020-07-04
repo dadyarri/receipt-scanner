@@ -15,6 +15,12 @@ class TestUtils:
         "price": [27, 667, 18],
         "sum": [54, 667, 90],
     }
+    source_new_data = {
+        "name": ["хлеб", "молоко", "таб"],
+        "quantity": [3, 1, 1],
+        "price": [27, 37, 36],
+        "sum": [81, 37, 36],
+    }
     reference_data = {
         "category": ["хлеб", "аптека", "канцтовары"],
         "value": [54.0, 667.0, 90.0],
@@ -139,3 +145,21 @@ class TestUtils:
         month = utils.get_name_of_month(number)
 
         month | should.be_equal("")
+
+    def test_get_difference_of_dataframes(self):
+
+        old_source = pd.DataFrame(data=self.source_data)
+        new_source = pd.DataFrame(data=self.source_new_data)
+
+        old_categories = utils.sort_purchases(old_source)
+        new_categories = utils.sort_purchases(new_source)
+        diff = utils.get_difference_of_dataframes(old_categories, new_categories)
+
+        ref_data = {
+            "category": ["хлеб", "аптека"],
+            "old": [54.0, 667.0],
+            "new": [81.0, 36.0],
+            "delta": [27.0, -631.0],
+        }
+
+        diff.equals(pd.DataFrame(data=ref_data))
