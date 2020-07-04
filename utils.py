@@ -9,7 +9,7 @@ import yaml
 from PIL import Image
 from pyzbar.pyzbar import decode
 
-from nalog import Nalog
+from ftd import FTD
 
 
 def scan_qr(img: Image):
@@ -121,7 +121,7 @@ def collect_data(path):
 
     if decoded:
 
-        nalog = Nalog(os.environ["phone"], os.environ["password"])
+        nalog = FTD(os.environ["phone"], os.environ["password"])
 
         for rec in decoded:
             receipt_data = dict(

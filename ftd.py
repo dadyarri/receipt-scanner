@@ -1,7 +1,7 @@
 import requests
 
 
-class Nalog:
+class FTD:
     """Реализация подключения к API Налоговой службы
 
     Args:
