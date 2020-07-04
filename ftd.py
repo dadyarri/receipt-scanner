@@ -16,7 +16,7 @@ class FTD:
         self.phone = phone
         self.password = password
 
-    def exist_receipt(self, fn: int, n: int, i: int, fp: int, t:str, s:float):
+    def exist_receipt(self, fn: int, n: int, i: int, fp: int, t: str, s: float):
         """
         Проверка существования чека
 
@@ -44,7 +44,7 @@ class FTD:
         if query.status_code == 406:
             return False
 
-    def get_full_data_of_receipt(self, fn:int, i: int, fp: int, **_):
+    def get_full_data_of_receipt(self, fn: int, i: int, fp: int, **_):
         """Получение подробной информации о чеке
         Arguments:
             fn: Фискальный номер. 16-значное число
