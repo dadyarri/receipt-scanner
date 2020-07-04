@@ -36,6 +36,9 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         DataFrame: Упорядоченный по сумме трат датафрейм с категориями
+
+    TODO:
+        Рефактор с использованием фич Pandas
     """
     categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
@@ -61,13 +64,6 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
         else:
             print(f"* {purchase['name']}")
     return categories.sort_values(by="value")
-
-
-def get_summ_of_purchases(receipt: pd.DataFrame):
-    summ = 0
-    for ind, purchase in receipt.iterrows():
-        summ += purchase["sum"]
-    return summ
 
 
 def get_previous_date(week: int, month: int):

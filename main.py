@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     print("-----------")
 
-    if (summ := round(utils.get_summ_of_purchases(receipt))) > sum(categories.value):
+    if (total := round(receipt["sum"].sum())) > sum(categories.value):
         text_of_summ = (
-            f"Сумма покупок: {round(sum(categories.value))} / " f"{summ} руб."
+            f"Сумма покупок: {round(sum(categories.value))} / " f"{total} руб."
         )
     else:
         text_of_summ = f"Сумма покупок: {round(sum(categories.value))} руб."
