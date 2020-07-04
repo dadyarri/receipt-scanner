@@ -77,10 +77,11 @@ def get_previous_date(week: int, month: int):
 
 
 def get_name_of_month(number):
-    months = "|января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря".split(
-        "|"
-    )
-    return months[number]
+    import locale
+    import calendar
+
+    locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
+    return calendar.month_name[number]
 
 
 def collect_data(path):
