@@ -36,9 +36,106 @@ class TestUtils:
 
         categories.equals(pd.DataFrame(data=reference).sort_values(by="value"))
 
-    def test_get_name_of_month(self):
+    def test_get_name_of_month_jan(self):
+        number = 1
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("января")
+
+    def test_get_name_of_month_feb(self):
+        number = 2
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("февраля")
+
+    def test_get_name_of_month_mar(self):
+        number = 3
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("марта")
+
+    def test_get_name_of_month_apr(self):
+        number = 4
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("апреля")
+
+    def test_get_name_of_month_may(self):
+        number = 5
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("мая")
+
+    def test_get_name_of_month_jun(self):
+        number = 6
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("июня")
+
+    def test_get_name_of_month_jul(self):
+        number = 7
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("июля")
+
+    def test_get_name_of_month_aug(self):
+        number = 8
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("августа")
+
+    def test_get_name_of_month_sep(self):
+        number = 9
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("сентября")
+
+    def test_get_name_of_month_oct(self):
         number = 10
 
         month = utils.get_name_of_month(number)
 
         month | should.be_equal("октября")
+
+    def test_get_name_of_month_nov(self):
+        number = 11
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("ноября")
+
+    def test_get_name_of_month_dec(self):
+        number = 12
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("декабря")
+
+    def test_get_name_of_month_with_unexpected_positive_number(self):
+        number = 13
+
+        with should.throw(IndexError):
+            utils.get_name_of_month(number)
+
+    def test_get_name_of_month_with_negative_number(self):
+        number = -2
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("ноября")
+
+    def test_get_name_of_month_with_unexpected_zero(self):
+        number = 0
+
+        month = utils.get_name_of_month(number)
+
+        month | should.be_equal("")
