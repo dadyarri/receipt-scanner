@@ -37,32 +37,21 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame: Упорядоченный по сумме трат датафрейм с категориями
 
-    TODO:
-        Рефактор с использованием фич Pandas
     """
     categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
-    found = False
-    for ind, purchase in receipt.iterrows():
-        for category, filters in products.items():
-            for fltr in filters[:-1]:
-                matches = re.fullmatch(rf".*\b({fltr})\b.*", purchase["name"], re.I)
-                if matches is not None:
-                    if categories[categories["category"].str.contains(category)].empty:
-                        categories = categories.append(
-                            {"category": category, "value": 0.0}, ignore_index=True
-                        )
-                    categories.loc[categories["category"] == category, "value"] += ceil(
-                        purchase["sum"]
+    for category, filters in products.items():
+        for fltr in filters[:-1]:
+            slc = receipt.name.str.contains(fltr, regex=True, na=False, case=False)
+            if slc.any():
+                if categories[categories["category"].str.contains(category)].empty:
+                    categories = categories.append(
+                        {"category": category, "value": 0.0}, ignore_index=True
                     )
-                    receipt.at[ind, "category"] = category
-                    found = True
-                    break
-            if found:
-                found = False
-                break
-        else:
-            print(f"* {purchase['name']}")
+                categories.loc[categories["category"] == category, "value"] += ceil(
+                    receipt[slc]["sum"].sum()
+                )
+                receipt.loc[slc, "category"] = category
     return categories.sort_values(by="value")
 
 
