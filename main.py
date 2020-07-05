@@ -45,14 +45,7 @@ if __name__ == "__main__":
 
     print(tabulate(receipt, headers="keys", tablefmt="psql"))
 
-    print("-----------")
-
     print("Построение диаграммы...")
-
-    for item in utils.get_legend(categories, diff)[0]:
-        print(item)
-
-    print("-----------")
 
     if (total := round(receipt["sum"].sum())) > sum(categories.value):
         text_of_summ = (
