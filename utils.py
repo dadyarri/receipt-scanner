@@ -108,6 +108,19 @@ def collect_data(path: Path) -> pd.DataFrame:
             )
             receipt_data["s"] = receipt_data["s"].replace(".", "")
 
+            keys = {
+                "t": "datetime",
+                "s": "summ",
+                "fn": "fiscal_number",
+                "i": "fiscal_doc",
+                "fp": "fiscal_sign",
+                "n": "receipt_type",
+            }
+
+            receipt_data = dict(
+                (keys[key], value) for (key, value) in receipt_data.items()
+            )
+
             if nalog.exist_receipt(**receipt_data):
                 receipt = receipt.append(
                     nalog.get_full_data_of_receipt(**receipt_data), ignore_index=True
