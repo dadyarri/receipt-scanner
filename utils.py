@@ -1,4 +1,3 @@
-import csv
 import os
 from math import ceil
 from pathlib import Path
