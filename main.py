@@ -1,7 +1,6 @@
 import warnings
 from pathlib import Path
 
-from matplotlib import pyplot as plt
 from tabulate import tabulate
 
 import utils
@@ -51,41 +50,11 @@ if __name__ == "__main__":
 
     print("Построение диаграммы...")
 
-    if (total := round(receipt["sum"].sum())) > sum(categories.value):
-        text_of_summ = f"Сумма покупок: {round(sum(categories.value))} / {total} руб."
-    else:
-        text_of_summ = f"Сумма покупок: {round(sum(categories.value))} руб."
-
-    legend, colors = utils.get_legend(categories, diff)
-
-    fig1, ax1 = plt.subplots()
-    ax1.pie(
-        categories.value,
-        colors=colors,
-        startangle=90,
-        pctdistance=0.9,
-        labeldistance=None,
-        explode=tuple([0.1] * len(categories)),
+    text_of_summ = utils.get_text_of_summ(
+        receipt["sum"].sum(), categories["value"].sum()
     )
 
-    ax1.axis("off")
-
-    centre_circle = plt.Circle((0, 0), 0.85, fc="white")
-    fig = plt.gcf()
-    fig.set_size_inches(8, 8)
-    fig.gca().add_artist(centre_circle)
-
-    month_word = utils.get_name_of_month(month)
-
-    plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
-    plt.text(
-        x=1, y=1.5, s=text_of_summ,
-    )
-    plt.legend(
-        labels=legend, bbox_to_anchor=(1, 0.8),
-    )
-    plt.axis("equal")
-    plt.tight_layout()
+    plt = utils.build_diagram(week, month, text_of_summ, categories, diff)
 
     try:
         plt.savefig(

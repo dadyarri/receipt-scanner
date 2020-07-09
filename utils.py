@@ -8,6 +8,7 @@ from PIL import Image
 from pyzbar.pyzbar import decode
 
 from ftd import FTD
+from matplotlib import pyplot as plt
 
 
 def scan_qr(img: Image):
@@ -146,3 +147,52 @@ def get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
         legend.append(f"{title.capitalize()} {summ} ({percentage}%){delta}")
         colors.append(products[title][-1])
     return legend, colors
+
+
+def get_text_of_summ(receipt_summ, cat_summ):
+    if total := round(receipt_summ) > round(cat_summ):
+        return f"Сумма покупок: {round(cat_summ)} / {total} руб."
+
+    return f"Сумма покупок: {round(cat_summ)} руб."
+
+
+def build_diagram(
+    week: int,
+    month: int,
+    text_of_summ: str,
+    categories: pd.DataFrame,
+    diff: pd.DataFrame,
+):
+
+    legend, colors = get_legend(categories, diff)
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(
+        categories.value,
+        colors=colors,
+        startangle=90,
+        pctdistance=0.9,
+        labeldistance=None,
+        explode=tuple([0.1] * len(categories)),
+    )
+
+    ax1.axis("off")
+
+    centre_circle = plt.Circle((0, 0), 0.85, fc="white")
+    fig = plt.gcf()
+    fig.set_size_inches(8, 8)
+    fig.gca().add_artist(centre_circle)
+
+    month_word = get_name_of_month(month)
+
+    plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
+    plt.text(
+        x=1, y=1.5, s=text_of_summ,
+    )
+    plt.legend(
+        labels=legend, bbox_to_anchor=(1, 0.8),
+    )
+    plt.axis("equal")
+    plt.tight_layout()
+
+    return plt
