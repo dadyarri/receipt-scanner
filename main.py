@@ -43,11 +43,11 @@ if __name__ == "__main__":
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
 
+    print(tabulate(receipt, headers="keys", tablefmt="psql", numalign="center"))
+
     print("Вычисление разницы между неделями...")
 
     diff = utils.get_difference_of_dataframes(old_categories, categories)
-
-    print(tabulate(receipt, headers="keys", tablefmt="psql"))
 
     print("Построение диаграммы...")
 
