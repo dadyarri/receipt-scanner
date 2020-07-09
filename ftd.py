@@ -16,7 +16,7 @@ class FTD:
         self.phone = phone
         self.password = password
 
-    def exist_receipt(
+    def is_receipt_exists(
         self,
         fiscal_number: str,
         receipt_type: str,

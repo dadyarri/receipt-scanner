@@ -121,7 +121,7 @@ def collect_data(path: Path) -> pd.DataFrame:
                 (keys[key], value) for (key, value) in receipt_data.items()
             )
 
-            if nalog.exist_receipt(**receipt_data):
+            if nalog.is_receipt_exists(**receipt_data):
                 receipt = receipt.append(
                     nalog.get_full_data_of_receipt(**receipt_data), ignore_index=True
                 )
