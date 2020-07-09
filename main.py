@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 from matplotlib import pyplot as plt
@@ -6,6 +7,9 @@ from tabulate import tabulate
 import utils
 
 if __name__ == "__main__":
+
+    warnings.simplefilter(action="ignore", category=UserWarning)
+
     week = ""
     month = ""
 
@@ -48,9 +52,7 @@ if __name__ == "__main__":
     print("Построение диаграммы...")
 
     if (total := round(receipt["sum"].sum())) > sum(categories.value):
-        text_of_summ = (
-            f"Сумма покупок: {round(sum(categories.value))} / " f"{total} руб."
-        )
+        text_of_summ = f"Сумма покупок: {round(sum(categories.value))} / {total} руб."
     else:
         text_of_summ = f"Сумма покупок: {round(sum(categories.value))} руб."
 
