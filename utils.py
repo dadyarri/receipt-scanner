@@ -1,6 +1,5 @@
 import csv
 import os
-import re
 from math import ceil
 from pathlib import Path
 
