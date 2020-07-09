@@ -5,10 +5,8 @@ from tabulate import tabulate
 
 import utils
 
-if __name__ == "__main__":
 
-    warnings.simplefilter(action="ignore", category=UserWarning)
-
+def main(root_dir: Path = Path("source")):
     week = ""
     month = ""
 
@@ -26,8 +24,8 @@ if __name__ == "__main__":
     date = f"{week}-{month}"
     old_date = utils.get_previous_date(week, month)
 
-    source_path = Path(f"source/{date}")
-    old_source_path = Path(f"source/{old_date}")
+    source_path = Path(root_dir, date)
+    old_source_path = Path(root_dir, old_date)
 
     print("Сбор данных...")
 
@@ -65,3 +63,10 @@ if __name__ == "__main__":
         print("Не могу подключиться к целевому устройству")
 
     plt.show()
+
+
+if __name__ == "__main__":
+
+    warnings.simplefilter(action="ignore", category=UserWarning)
+
+    main()
