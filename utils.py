@@ -54,12 +54,11 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_previous_date(week: int, month: int) -> str:
-    # TODO: Переписать! Работает не всегда верно!
     if n := week - 1:
         return f"{n}-{month}"
     path = Path("source")
     weeks = []
-    for p in path.glob("*"):
+    for p in path.glob(f"*-{month - 1}"):
         weeks.append(int(str(p).replace("source/", "").split("-")[0]))
     return f"{max(weeks)}-{month - 1}"
 
