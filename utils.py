@@ -55,7 +55,7 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     return categories.sort_values(by="value")
 
 
-def get_previous_date(week: int, month: int):
+def get_previous_date(week: int, month: int) -> str:
     if n := week - 1:
         return f"{n}-{month}"
     path = Path("source")
@@ -65,7 +65,7 @@ def get_previous_date(week: int, month: int):
     return f"{max(weeks)}-{month - 1}"
 
 
-def get_name_of_month(number):
+def get_name_of_month(number: int) -> str:
     import locale
     import calendar
 
@@ -73,7 +73,7 @@ def get_name_of_month(number):
     return calendar.month_name[number]
 
 
-def collect_data(path):
+def collect_data(path: Path) -> pd.DataFrame:
 
     decoded = []
     receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
@@ -125,7 +125,9 @@ def collect_data(path):
     return receipt
 
 
-def get_difference_of_dataframes(old_frame: pd.DataFrame, new_frame: pd.DataFrame):
+def get_difference_of_dataframes(
+    old_frame: pd.DataFrame, new_frame: pd.DataFrame
+) -> pd.DataFrame:
     df = old_frame.merge(new_frame, "left", on="category")
     df.columns = ["category", "old", "new"]
     df = df.dropna()
@@ -133,7 +135,7 @@ def get_difference_of_dataframes(old_frame: pd.DataFrame, new_frame: pd.DataFram
     return df
 
 
-def get_legend(categories, diff):
+def get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
 
     legend = []
     colors = []
