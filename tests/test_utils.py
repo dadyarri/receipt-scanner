@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from PIL import Image
-from pyshould import *
+from pyshould import it
 
 import utils
 
@@ -31,7 +31,7 @@ class TestUtils:
 
         qr = utils.scan_qr(img)
 
-        qr | should.be_equal(
+        it(qr).should.be_equal(
             "t=20200603T1725&s=198.00&fn=9289000100520657&i=45218&fp=3126471012&n=1"
         )
 
@@ -59,3 +59,19 @@ class TestUtils:
         }
 
         diff.equals(pd.DataFrame(data=ref_data))
+
+    def test_get_previous_date_in_current_month(self):
+        week = 2
+        month = 7
+
+        prev_date = utils.get_previous_date(week, month)
+
+        it(prev_date).should.be_equal("1-7")
+
+    def test_get_previous_date_in_previous_month(self):
+        week = 1
+        month = 7
+
+        prev_date = utils.get_previous_date(week, month)
+
+        it(prev_date).should.be_equal("4-6")
