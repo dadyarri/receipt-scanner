@@ -16,26 +16,34 @@ class FTD:
         self.phone = phone
         self.password = password
 
-    def exist_receipt(self, fn: int, n: int, i: int, fp: int, t: str, s: float):
+    def exist_receipt(
+        self,
+        fiscal_number: str,
+        receipt_type: str,
+        fiscal_doc: str,
+        fiscal_sign: str,
+        datetime: str,
+        summ: str,
+    ):
         """
         Проверка существования чека
 
         Args:
-            fn: Фискальный номер. 16-значное число
-            i: Фискальный документ: Число до 10 знаков
-            fp: Фискальный признак документа: Число до 10 знаков
-            n: Вид кассового чека (1 - приход, 2 - возрат прихода)
-            t: Дата совершения покупки
-            s: Сумма чека в копейках
+            fiscal_number: Фискальный номер. 16-значное число
+            fiscal_doc: Фискальный документ: Число до 10 знаков
+            fiscal_sign: Фискальный признак документа: Число до 10 знаков
+            receipt_type: Вид кассового чека (1 - приход, 2 - возврат прихода)
+            datetime: Дата совершения покупки
+            summ: Сумма чека в копейках
         """
         exist_url = (
             f"https://proverkacheka.nalog.ru:9999/v1/ofds/*/inns/*/fss/"
-            f"{fn}/operations/{n}/tickets/{i}"
+            f"{fiscal_number}/operations/{receipt_type}/tickets/{fiscal_doc}"
         )
         receipt_data = {
-            "fiscalSign": fp,
-            "date": t,
-            "sum": s,
+            "fiscalSign": fiscal_sign,
+            "date": datetime,
+            "sum": summ,
         }
         query = requests.get(exist_url, receipt_data, auth=(self.phone, self.password))
 
@@ -44,16 +52,18 @@ class FTD:
         if query.status_code == 406:
             return False
 
-    def get_full_data_of_receipt(self, fn: int, i: int, fp: int, **_):
+    def get_full_data_of_receipt(
+        self, fiscal_number: str, fiscal_doc: str, fiscal_sign: str, **_
+    ) -> list:
         """Получение подробной информации о чеке
         Arguments:
-            fn: Фискальный номер. 16-значное число
-            i: Фискальный документ: Число до 10 знаков
-            fp: Фискальный признак документа: Число до 10 знаков
+            fiscal_number: Фискальный номер. 16-значное число
+            fiscal_doc: Фискальный документ: Число до 10 знаков
+            fiscal_sign: Фискальный признак документа: Число до 10 знаков
         """
         full_url = (
             f"https://proverkacheka.nalog.ru:9999/v1/inns/*/kkts/*/fss"
-            f"/{fn}/tickets/{i}?fiscalSign={fp}&sendToEmail=no"
+            f"/{fiscal_number}/tickets/{fiscal_doc}?fiscalSign={fiscal_sign}&sendToEmail=no"
         )
 
         query = requests.get(
