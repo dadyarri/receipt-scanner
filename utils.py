@@ -55,6 +55,7 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_previous_date(week: int, month: int) -> str:
+    # TODO: Переписать! Работает не всегда верно!
     if n := week - 1:
         return f"{n}-{month}"
     path = Path("source")
@@ -75,7 +76,6 @@ def get_name_of_month(number: int) -> str:
 def collect_data(path: Path) -> pd.DataFrame:
 
     decoded = []
-    receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
 
     for file in path.rglob("*.jpg"):
         img = Image.open(file)
@@ -89,23 +89,15 @@ def collect_data(path: Path) -> pd.DataFrame:
         else:
             print(f"Невозможно прочесть {file}")
 
-    txt = Path(path, "goods.csv")
-    if txt.exists():
-        with open(txt, "r") as file:
-            reader = csv.reader(file)
-            for line in reader:
-                name = line[0]
-                quantity = float(line[1])
-                price = float(line[2])
-                receipt = receipt.append(
-                    {
-                        "name": name,
-                        "quantity": quantity,
-                        "price": price / 100,
-                        "sum": (quantity * price) / 100,
-                    },
-                    ignore_index=True,
-                )
+    frames = [
+        pd.read_csv(file, names=["name", "quantity", "price"])
+        for file in path.rglob("*.csv")
+    ]
+    if frames:
+        receipt = pd.concat(frames)
+        receipt["sum"] = receipt["price"] * receipt["quantity"] / 100
+    else:
+        receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
 
     if decoded:
 
