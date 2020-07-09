@@ -64,7 +64,7 @@ def get_previous_date(week: int, month: int) -> str:
     return f"{max(weeks)}-{month - 1}"
 
 
-def get_name_of_month(number: int) -> str:
+def _get_name_of_month(number: int) -> str:
     import locale
     import calendar
 
@@ -125,8 +125,7 @@ def get_difference_of_dataframes(
     return df
 
 
-def get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
-
+def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
     legend = []
     colors = []
     products = yaml.full_load(open("products.yml", "r"))
@@ -163,8 +162,7 @@ def build_diagram(
     categories: pd.DataFrame,
     diff: pd.DataFrame,
 ):
-
-    legend, colors = get_legend(categories, diff)
+    legend, colors = _get_legend(categories, diff)
 
     fig1, ax1 = plt.subplots()
     ax1.pie(
@@ -183,7 +181,7 @@ def build_diagram(
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
 
-    month_word = get_name_of_month(month)
+    month_word = _get_name_of_month(month)
 
     plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
     plt.text(
