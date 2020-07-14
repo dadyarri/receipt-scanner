@@ -40,7 +40,15 @@ def main(root_dir: Path = Path("source")):
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
 
-    print(tabulate(receipt, headers="keys", tablefmt="psql", numalign="center"))
+    print(
+        tabulate(
+            receipt,
+            headers="keys",
+            tablefmt="psql",
+            numalign="center",
+            stralign="center",
+        )
+    )
 
     print("Вычисление разницы между неделями...")
 
