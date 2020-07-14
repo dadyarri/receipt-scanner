@@ -9,6 +9,11 @@ import utils
 
 class TestUtils:
 
+    test_image = Path("source/1-6/0001.png")
+    test_image_decoded = (
+        "t=20200603T1725&s=198.00&fn=9289000100520657&i=45218&fp=3126471012&n=1"
+    )
+
     source_data = {
         "name": ["хлеб", "таб", "ручка гел"],
         "quantity": [2, 1, 5],
@@ -27,13 +32,11 @@ class TestUtils:
     }
 
     def test_scan_qr(self):
-        img = Image.open(Path("source/1-6/0001.png"))
+        img = Image.open(self.test_image)
 
         qr = utils.scan_qr(img)
 
-        it(qr).should.be_equal(
-            "t=20200603T1725&s=198.00&fn=9289000100520657&i=45218&fp=3126471012&n=1"
-        )
+        it(qr).should.be_equal(self.test_image_decoded)
 
     def test_sort_purchases(self):
         source = pd.DataFrame(data=self.source_data)
