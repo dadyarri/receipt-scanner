@@ -73,7 +73,6 @@ class FTD:
         )
 
         if query.status_code == 406:
-            print("Чек не найден")
             receipt = []
         elif query.status_code == 202:
             print("Существование чека не было проверено")

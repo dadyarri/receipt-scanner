@@ -75,13 +75,14 @@ def _get_name_of_month(number: int) -> str:
 def collect_data(path: Path) -> pd.DataFrame:
 
     decoded = []
+    files = [f for f in path.rglob("*.png")]
 
     for file in path.rglob("*.jpg"):
         img = Image.open(file)
         img.save(str(file)[:-3] + "png")
         file.unlink()
 
-    for file in path.rglob("*.png"):
+    for file in files:
         img = Image.open(file)
         if qr := scan_qr(img):
             decoded.append(qr)
@@ -101,8 +102,9 @@ def collect_data(path: Path) -> pd.DataFrame:
     if decoded:
 
         nalog = FTD(os.environ["phone"], os.environ["password"])
+        
 
-        for rec in decoded:
+        for ind, rec in enumerate(decoded):
             receipt_data = dict(
                 [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
             )
@@ -122,9 +124,13 @@ def collect_data(path: Path) -> pd.DataFrame:
             )
 
             if nalog.is_receipt_exists(**receipt_data):
-                receipt = receipt.append(
-                    nalog.get_full_data_of_receipt(**receipt_data), ignore_index=True
-                )
+                r = nalog.get_full_data_of_receipt(**receipt_data)
+                if r:
+                    receipt = receipt.append(
+                        r, ignore_index=True
+                    )
+                else:
+                    print(f"Чек {files[ind]} не найден")
     return receipt
 
 
@@ -162,6 +168,9 @@ def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
 
 
 def get_text_of_summ(receipt_summ, cat_summ):
+    # TODO: 
+    #   неверная работа с моржовым присваиванием,
+    #   если условие выполняется
     if total := round(receipt_summ) > round(cat_summ):
         return f"Сумма покупок: {round(cat_summ)} / {total} руб."
 
