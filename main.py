@@ -40,15 +40,34 @@ def main(root_dir: Path = Path("source")):
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
 
-    print(
-        tabulate(
-            receipt,
-            headers="keys",
-            tablefmt="psql",
-            numalign="center",
-            stralign="center",
+    if not receipt.dropna().empty:
+
+        print("Отсортированные элементы:")
+
+        print(
+            tabulate(
+                receipt.dropna(),
+                headers="keys",
+                tablefmt="psql",
+                numalign="center",
+                stralign="center",
+            )
         )
-    )
+
+    if not receipt[receipt.isnull().any(axis=1)].empty:
+        print("Несортированные элементы:")
+
+        print(
+            tabulate(
+                receipt[receipt.isnull().any(axis=1)].loc[
+                    :, receipt.columns != "category"
+                ],
+                headers="keys",
+                tablefmt="psql",
+                numalign="center",
+                stralign="center",
+            )
+        )
 
     print("Вычисление разницы между неделями...")
 
