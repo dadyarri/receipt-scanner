@@ -15,6 +15,7 @@ pyyaml = "*"
 matplotlib = "*"
 pandas = "*"
 tabulate = "*"
+click = "*"
 
 [requires]
 python_version = "3.8"
