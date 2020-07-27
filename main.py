@@ -5,6 +5,16 @@ from tabulate import tabulate
 
 import utils
 
+########################
+# receipt-scanner v3.0 (c) 2020 dadyarri
+# MIT License
+#
+# TODO:
+#   1. Написать консольный интерфейс
+#   2. Переписать некоторые утилиты
+#
+########################
+
 
 def main(root_dir: Path = Path("source")):
     week = ""
