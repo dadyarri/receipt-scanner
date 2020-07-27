@@ -165,10 +165,7 @@ def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
 
 
 def get_text_of_summ(receipt_summ, cat_summ):
-    # TODO:
-    #   неверная работа с моржовым присваиванием,
-    #   если условие выполняется
-    if total := round(receipt_summ) > round(cat_summ):
+    if (total := round(receipt_summ)) > round(cat_summ):
         return f"Сумма покупок: {round(cat_summ)} / {total} руб."
 
     return f"Сумма покупок: {round(cat_summ)} руб."
