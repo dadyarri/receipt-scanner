@@ -154,8 +154,10 @@ def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
             d = int(item["delta"].item())
             if d > 0:
                 delta = f" +{d} руб."
-            else:
+            elif d < 0:
                 delta = f" {d} руб."
+            else:
+                delta = ""
         else:
             delta = ""
 
