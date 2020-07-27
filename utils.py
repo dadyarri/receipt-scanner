@@ -95,7 +95,7 @@ def collect_data(path: Path) -> pd.DataFrame:
     ]
     if frames:
         receipt = pd.concat(frames)
-        receipt["sum"] = receipt["price"] * receipt["quantity"] / 100
+        receipt["sum"] = receipt["price"] * receipt["quantity"]
     else:
         receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
 
