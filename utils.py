@@ -31,6 +31,33 @@ def scan_qr(img: Image):
     return ""
 
 
+def parse_qr(data: str) -> dict:
+    """
+    Приводит данные с QR-кода в читаемый формат
+    Args:
+        data: Данные с QR-кода
+
+    Returns:
+        dict: Читаемый формат
+    """
+    receipt_data = dict(
+        [tuple(j.replace("\n", "").split("=")) for j in data.split("&")]
+    )
+    receipt_data["s"] = receipt_data["s"].replace(".", "")
+
+    keys = {
+        "t": "datetime",
+        "s": "summ",
+        "fn": "fiscal_number",
+        "i": "fiscal_doc",
+        "fp": "fiscal_sign",
+        "n": "receipt_type",
+    }
+
+    receipt_data = dict((keys[key], value) for (key, value) in receipt_data.items())
+    return receipt_data
+
+
 def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     """
     Сортирует покупки по категориям
@@ -116,23 +143,8 @@ def collect_data(path: Path) -> pd.DataFrame:
         nalog = FTD(os.environ["phone"], os.environ["password"])
 
         for ind, rec in enumerate(decoded):
-            receipt_data = dict(
-                [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
-            )
-            receipt_data["s"] = receipt_data["s"].replace(".", "")
 
-            keys = {
-                "t": "datetime",
-                "s": "summ",
-                "fn": "fiscal_number",
-                "i": "fiscal_doc",
-                "fp": "fiscal_sign",
-                "n": "receipt_type",
-            }
-
-            receipt_data = dict(
-                (keys[key], value) for (key, value) in receipt_data.items()
-            )
+            receipt_data = parse_qr(rec)
 
             if nalog.is_receipt_exists(**receipt_data):
                 r = nalog.get_full_data_of_receipt(**receipt_data)
