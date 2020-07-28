@@ -1,4 +1,5 @@
 import logging
+import os
 import traceback
 
 
@@ -24,7 +25,7 @@ class BaseFormatter(logging.Formatter):
 
 def init():
     logger = logging.getLogger("rc")
-    logger.setLevel("INFO")
+    logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
     console = logging.StreamHandler()
     console.setFormatter(BaseFormatter())
     logger.addHandler(console)
