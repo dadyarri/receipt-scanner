@@ -27,7 +27,6 @@ def scan_qr(img: Image):
         decoded = qr[0].data.decode("UTF-8")
         logger.debug(f"Расшифрованный QR-код: {decoded}")
         return decoded
-    logger.debug("Ошибка расшифровки")
     return ""
 
 
