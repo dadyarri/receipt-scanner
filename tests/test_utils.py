@@ -58,37 +58,3 @@ class TestUtils:
         categories = utils.sort_purchases(source)
 
         categories.equals(pd.DataFrame(data=reference).sort_values(by="value"))
-
-    def test_get_difference_of_dataframes(self):
-
-        old_source = pd.DataFrame(data=self.source_data)
-        new_source = pd.DataFrame(data=self.source_new_data)
-
-        old_categories = utils.sort_purchases(old_source)
-        new_categories = utils.sort_purchases(new_source)
-        diff = utils.get_difference_of_dataframes(old_categories, new_categories)
-
-        ref_data = {
-            "category": ["хлеб", "аптека"],
-            "old": [54.0, 667.0],
-            "new": [81.0, 36.0],
-            "delta": [27.0, -631.0],
-        }
-
-        diff.equals(pd.DataFrame(data=ref_data))
-
-    def test_get_previous_date_in_current_month(self):
-        week = 2
-        month = 7
-
-        prev_date = utils.get_previous_date(week, month)
-
-        it(prev_date).should.be_equal("1-7")
-
-    def test_get_previous_date_in_previous_month(self):
-        week = 1
-        month = 7
-
-        prev_date = utils.get_previous_date(week, month)
-
-        it(prev_date).should.be_equal("4-6")

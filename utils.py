@@ -91,16 +91,6 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     return categories.sort_values(by="value")
 
 
-def get_previous_date(week: int, month: int, root_dir: str = "source") -> str:
-    if n := week - 1:
-        return f"{n}-{month}"
-    path = Path("source")
-    weeks = []
-    for p in path.glob(f"*-{month - 1}"):
-        weeks.append(int(str(p).replace(f"{root_dir}/", "").split("-")[0]))
-    return f"{max(weeks)}-{month - 1}"
-
-
 def _get_name_of_month(number: int) -> str:
     import locale
     import calendar
@@ -140,17 +130,7 @@ def collect_data(path: Path) -> pd.DataFrame:
     return receipt
 
 
-def get_difference_of_dataframes(
-    old_frame: pd.DataFrame, new_frame: pd.DataFrame
-) -> pd.DataFrame:
-    df = old_frame.merge(new_frame, "left", on="category")
-    df.columns = ["category", "old", "new"]
-    df = df.dropna()
-    df["delta"] = df["new"] - df["old"]
-    return df
-
-
-def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
+def _get_legend(categories: pd.DataFrame) -> (list, list):
     legend = []
     colors = []
     products = yaml.full_load(open("products.yml", "r"))
@@ -158,19 +138,8 @@ def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
         title = value.category
         summ = r" $\bf{" + str(round(value.value)) + "  руб.}$"
         percentage = round(value.value / sum(categories.value) * 100, 2)
-        item = diff.loc[diff["category"] == title]
-        if len(item.index) > 0:
-            d = int(item["delta"].item())
-            if d > 0:
-                delta = f" +{d} руб."
-            elif d < 0:
-                delta = f" {d} руб."
-            else:
-                delta = ""
-        else:
-            delta = ""
 
-        legend.append(f"{title.capitalize()} {summ} ({percentage}%){delta}")
+        legend.append(f"{title.capitalize()} {summ} ({percentage}%)")
         colors.append(products[title][-1])
     return legend, colors
 
@@ -183,13 +152,9 @@ def get_text_of_summ(receipt_summ, cat_summ):
 
 
 def build_diagram(
-    week: int,
-    month: int,
-    text_of_summ: str,
-    categories: pd.DataFrame,
-    diff: pd.DataFrame,
+    week: int, month: int, text_of_summ: str, categories: pd.DataFrame,
 ):
-    legend, colors = _get_legend(categories, diff)
+    legend, colors = _get_legend(categories)
 
     fig1, ax1 = plt.subplots()
     ax1.pie(
