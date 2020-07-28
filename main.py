@@ -4,6 +4,7 @@ from pathlib import Path
 from tabulate import tabulate
 
 import utils
+import logger
 
 ########################
 # receipt-scanner v3.0 (c) 2020 dadyarri
@@ -105,5 +106,9 @@ def main(root_dir: Path = Path("source")):
 if __name__ == "__main__":
 
     warnings.simplefilter(action="ignore", category=UserWarning)
+    logger = logger.init()
 
-    main()
+    try:
+        main()
+    except Exception as err:
+        logger.error(f"\n\t{utils.get_class_name(err)}: {err}")
