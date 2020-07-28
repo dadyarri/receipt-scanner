@@ -2,6 +2,7 @@ import logging
 import warnings
 from pathlib import Path
 
+import click
 from tabulate import tabulate
 
 import utils
@@ -10,34 +11,27 @@ import logger
 ########################
 # receipt-scanner v3.0 (c) 2020 dadyarri
 # MIT License
-#
-# TODO:
-#   1. Написать консольный интерфейс
-#   2. Переписать некоторые утилиты
-#
 ########################
 
 
-def main(root_dir: Path = Path("source")):
-    week = ""
-    month = ""
+@click.command()
+@click.option(
+    "-p",
+    "--path",
+    type=click.Path(exists=True),
+    default=".",
+    help="Относительный путь до папки с данными",
+)
+@click.option(
+    "--nd", "--no-diagram", default=False, is_flag=True, help="Не строить диаграмму"
+)
+@click.option("-l", "--log-level", default="INFO", help="Уровень логгирования")
+def main(path: str, nd: bool, log_level: bool):
 
     logger = logging.getLogger("rc")
+    logger.setLevel(log_level)
 
-    while not week:
-        week = input("Номер недели: ")
-
-    while not month:
-        month = input("Номер месяца: ")
-
-    week = int(week)
-    month = int(month)
-
-    print("-----------")
-
-    date = f"{week}-{month}"
-
-    source_path = Path(root_dir, date)
+    source_path = Path(path)
 
     logger.info("Сбор данных...")
     receipt = utils.collect_data(source_path)
@@ -77,23 +71,23 @@ def main(root_dir: Path = Path("source")):
                 stralign="center",
             )
         )
+    if not nd:
+        logger.info("Построение диаграммы...")
 
-    logger.info("Построение диаграммы...")
-
-    text_of_summ = utils.get_text_of_summ(
-        receipt["sum"].sum(), categories["value"].sum()
-    )
-
-    plt = utils.build_diagram(week, month, text_of_summ, categories)
-
-    try:
-        plt.savefig(
-            fname=f"/run/user/1000/d2f8b09b693b47c4/primary/DCIM/Camera/figure_{date}.png",
+        text_of_summ = utils.get_text_of_summ(
+            receipt["sum"].sum(), categories["value"].sum()
         )
-    except FileNotFoundError:
-        logger.warning("Не могу подключиться к целевому устройству")
 
-    plt.show()
+        plt = utils.build_diagram(text_of_summ, categories)
+
+        try:
+            plt.savefig(
+                fname=f"/run/user/1000/d2f8b09b693b47c4/primary/DCIM/Camera/figure_{path}.png"
+            )
+        except FileNotFoundError:
+            logger.warning("Не могу подключиться к целевому устройству")
+
+        plt.show()
 
 
 if __name__ == "__main__":
