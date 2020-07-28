@@ -112,21 +112,8 @@ def _get_name_of_month(number: int) -> str:
 
 def collect_data(path: Path) -> pd.DataFrame:
 
-    decoded = []
     logger = logging.getLogger("rc")
-    files = [f for f in path.rglob("*.png")]
-
-    for file in path.rglob("*.jpg"):
-        img = Image.open(file)
-        img.save(str(file)[:-3] + "png")
-        file.unlink()
-
-    for file in files:
-        img = Image.open(file)
-        if qr := scan_qr(img):
-            decoded.append(qr)
-        else:
-            logger.warning(f"Невозможно прочесть {file}")
+    ftd = FTD(os.getenv("phone"), os.getenv("password"))
 
     frames = [
         pd.read_csv(file, names=["name", "quantity", "price"])
@@ -138,20 +125,19 @@ def collect_data(path: Path) -> pd.DataFrame:
     else:
         receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
 
-    if decoded:
-
-        nalog = FTD(os.environ["phone"], os.environ["password"])
-
-        for ind, rec in enumerate(decoded):
-
-            receipt_data = parse_qr(rec)
-
-            if nalog.is_receipt_exists(**receipt_data):
-                r = nalog.get_full_data_of_receipt(**receipt_data)
-                if r:
+    for file in path.rglob("*.png"):
+        img = Image.open(file)
+        if qr := scan_qr(img):
+            data = parse_qr(qr)
+            if ftd.is_receipt_exists(**data):
+                if r := ftd.get_full_data_of_receipt(**data):
                     receipt = receipt.append(r, ignore_index=True)
                 else:
-                    print(f"Чек {files[ind]} не найден")
+                    logger.warning(f"Данные по чеку {file} не пришли")
+            else:
+                logger.warning(f"Чек {file} не существует")
+        else:
+            logger.warning(f"Невозможно прочесть {file}")
     return receipt
 
 
