@@ -91,14 +91,6 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     return categories.sort_values(by="value")
 
 
-def _get_name_of_month(number: int) -> str:
-    import locale
-    import calendar
-
-    locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
-    return calendar.month_name[number]
-
-
 def collect_data(path: Path) -> pd.DataFrame:
 
     logger = logging.getLogger("rc")
@@ -152,7 +144,7 @@ def get_text_of_summ(receipt_summ, cat_summ):
 
 
 def build_diagram(
-    week: int, month: int, text_of_summ: str, categories: pd.DataFrame,
+    text_of_summ: str, categories: pd.DataFrame,
 ):
     legend, colors = _get_legend(categories)
 
@@ -173,9 +165,7 @@ def build_diagram(
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
 
-    month_word = _get_name_of_month(month)
-
-    plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
+    plt.title(label=f"Покупки по категориям", loc="center")
     plt.text(
         x=1, y=1.5, s=text_of_summ,
     )
