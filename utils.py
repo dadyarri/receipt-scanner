@@ -212,3 +212,7 @@ def build_diagram(
     plt.tight_layout()
 
     return plt
+
+
+def get_class_name(err):
+    return type(err).__name__
