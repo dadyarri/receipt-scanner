@@ -14,6 +14,15 @@ class TestUtils:
         "t=20200603T1725&s=198.00&fn=9289000100520657&i=45218&fp=3126471012&n=1"
     )
 
+    test_receipt_data = {
+        "datetime": "20200603T1725",
+        "summ": "19800",
+        "fiscal_number": "9289000100520657",
+        "fiscal_doc": "45218",
+        "fiscal_sign": "3126471012",
+        "receipt_type": "1",
+    }
+
     source_data = {
         "name": ["хлеб", "таб", "ручка гел"],
         "quantity": [2, 1, 5],
@@ -37,6 +46,11 @@ class TestUtils:
         qr = utils.scan_qr(img)
 
         it(qr).should.be_equal(self.test_image_decoded)
+
+    def test_parse_qr(self):
+        data = utils.parse_qr(self.test_image_decoded)
+
+        it(data).should.be_equal(self.test_receipt_data)
 
     def test_sort_purchases(self):
         source = pd.DataFrame(data=self.source_data)
