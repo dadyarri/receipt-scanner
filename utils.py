@@ -1,3 +1,4 @@
+import logging
 import os
 from math import ceil
 from pathlib import Path
@@ -20,10 +21,13 @@ def scan_qr(img: Image):
     Returns:
         str: Расшифрованный текст
     """
-
+    logger = logging.getLogger("rc")
     qr = decode(img)
     if qr:
-        return qr[0].data.decode("UTF-8")
+        decoded = qr[0].data.decode("UTF-8")
+        logger.debug(f"Расшифрованный QR-код: {decoded}")
+        return decoded
+    logger.debug("Ошибка расшифровки")
     return ""
 
 
@@ -37,18 +41,25 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
         DataFrame: Упорядоченный по сумме трат датафрейм с категориями
 
     """
+    logger = logging.getLogger("rc")
     categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
     for category, filters in products.items():
         for fltr in filters[:-1]:
             slc = receipt.name.str.contains(fltr, regex=True, na=False, case=False)
             if slc.any():
+                logger.debug(f'Найдены элементы, подходящие фильтру "{fltr}"')
                 if categories[categories["category"].str.contains(category)].empty:
+                    logger.debug(f'Создана категория "{category.capitalize()}"')
                     categories = categories.append(
                         {"category": category, "value": 0.0}, ignore_index=True
                     )
                 categories.loc[categories["category"] == category, "value"] += ceil(
                     receipt[slc]["sum"].sum()
+                )
+                logger.debug(
+                    f"Сумма по категории \"{category}\": {receipt[slc]['sum'].sum()} "
+                    f"руб."
                 )
                 receipt.loc[slc, "category"] = category
     return categories.sort_values(by="value")
@@ -75,6 +86,7 @@ def _get_name_of_month(number: int) -> str:
 def collect_data(path: Path) -> pd.DataFrame:
 
     decoded = []
+    logger = logging.getLogger("rc")
     files = [f for f in path.rglob("*.png")]
 
     for file in path.rglob("*.jpg"):
@@ -87,7 +99,7 @@ def collect_data(path: Path) -> pd.DataFrame:
         if qr := scan_qr(img):
             decoded.append(qr)
         else:
-            print(f"Невозможно прочесть {file}")
+            logger.warning(f"Невозможно прочесть {file}")
 
     frames = [
         pd.read_csv(file, names=["name", "quantity", "price"])

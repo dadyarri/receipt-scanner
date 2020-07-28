@@ -1,3 +1,4 @@
+import logging
 import warnings
 from pathlib import Path
 
@@ -21,6 +22,8 @@ def main(root_dir: Path = Path("source")):
     week = ""
     month = ""
 
+    logger = logging.getLogger("rc")
+
     while not week:
         week = input("Номер недели: ")
 
@@ -35,10 +38,12 @@ def main(root_dir: Path = Path("source")):
     date = f"{week}-{month}"
     old_date = utils.get_previous_date(week, month)
 
+    logger.debug(f"Предыдущая дата: {old_date}")
+
     source_path = Path(root_dir, date)
     old_source_path = Path(root_dir, old_date)
 
-    print("Сбор данных...")
+    logger.info("Сбор данных...")
 
     old_receipt = utils.collect_data(old_source_path)
     receipt = utils.collect_data(source_path)
@@ -46,17 +51,18 @@ def main(root_dir: Path = Path("source")):
     old_receipt = old_receipt[["name", "quantity", "price", "sum"]]
     receipt = receipt[["name", "quantity", "price", "sum"]]
 
-    print("Сортировка покупок...")
+    logger.info("Сортировка покупок...")
 
     old_categories = utils.sort_purchases(old_receipt)
     categories = utils.sort_purchases(receipt)
 
     if not receipt.dropna().empty:
 
-        print("Отсортированные элементы:")
+        logger.info("Отсортированные элементы:")
 
-        print(
-            tabulate(
+        logger.info(
+            "\n"
+            + tabulate(
                 receipt.dropna(),
                 headers="keys",
                 tablefmt="psql",
@@ -66,10 +72,12 @@ def main(root_dir: Path = Path("source")):
         )
 
     if not receipt[receipt.isnull().any(axis=1)].empty:
-        print("Несортированные элементы:")
 
-        print(
-            tabulate(
+        logger.info("Несортированные элементы:")
+
+        logger.info(
+            "\n"
+            + tabulate(
                 receipt[receipt.isnull().any(axis=1)].loc[
                     :, receipt.columns != "category"
                 ],
@@ -80,11 +88,11 @@ def main(root_dir: Path = Path("source")):
             )
         )
 
-    print("Вычисление разницы между неделями...")
+    logger.info("Вычисление разницы между неделями...")
 
     diff = utils.get_difference_of_dataframes(old_categories, categories)
 
-    print("Построение диаграммы...")
+    logger.info("Построение диаграммы...")
 
     text_of_summ = utils.get_text_of_summ(
         receipt["sum"].sum(), categories["value"].sum()
@@ -97,8 +105,7 @@ def main(root_dir: Path = Path("source")):
             fname=f"/run/user/1000/d2f8b09b693b47c4/primary/DCIM/Camera/figure_{date}.png",
         )
     except FileNotFoundError:
-        print()
-        print("Не могу подключиться к целевому устройству")
+        logger.warning("Не могу подключиться к целевому устройству")
 
     plt.show()
 
