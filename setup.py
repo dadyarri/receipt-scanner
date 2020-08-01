@@ -9,7 +9,6 @@ setup(
     version="3.0",
     packages=find_packages(),
     package_data={"": ["*.yml"]},
-    install_package_data=True,
     install_requires=[
         "requests",
         "pillow",
