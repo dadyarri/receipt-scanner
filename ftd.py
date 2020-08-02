@@ -79,17 +79,11 @@ class FTD:
             auth=(self.phone, self.password),
         )
 
-        if query.status_code == 406:
-            receipt = []
-        elif query.status_code == 202:
-            print("Существование чека не было проверено")
-            receipt = []
-        elif query.status_code == 200:
-            receipt = []
+        receipt = []
+
+        if query.status_code == 200:
             for item in query.json()["document"]["receipt"]["items"]:
                 item["price"] /= 100
                 item["sum"] /= 100
                 receipt.append(item)
-        else:
-            receipt = []
         return receipt
