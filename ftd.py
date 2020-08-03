@@ -39,11 +39,7 @@ class FTD:
             datetime: Дата совершения покупки
             summ: Сумма чека в копейках
 
-        TODO:
-            1. Понять чем отличаются непроверенные чеки от проверенных (нужен новый чек)
-            2. Сканироваать трафик приложения "Проверка чеков" для получения новой
-            информации об API
-        """
+       """
         exist_url = (
             f"https://proverkacheka.nalog.ru:9999/v1/ofds/*/inns/*/fss/"
             f"{fiscal_number}/operations/{receipt_type}/tickets/{fiscal_doc}"
