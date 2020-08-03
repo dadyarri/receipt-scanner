@@ -85,16 +85,7 @@ def main(path: str, nd: bool, log_level: bool):
             receipt["sum"].sum(), categories["value"].sum()
         )
 
-        plt = utils.build_diagram(text_of_summ, categories)
-
-        try:
-            plt.savefig(
-                fname=f"/run/user/1000/d2f8b09b693b47c4/primary/DCIM/Camera/figure_{path}.png"
-            )
-        except FileNotFoundError:
-            logger.warning("Не могу подключиться к целевому устройству")
-
-        plt.show()
+        utils.build_diagram(text_of_summ, categories).show()
 
 
 if __name__ == "__main__":
