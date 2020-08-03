@@ -38,6 +38,8 @@ def main(path: str, nd: bool, log_level: bool):
     receipt = utils.collect_data(source_path)
     receipt = receipt[["date", "name", "quantity", "price", "sum"]]
 
+    logger.info("Сумма покупок по дням:")
+
     for date in receipt["date"].unique():
         summ = math.ceil(receipt.loc[receipt["date"] == date, ["sum"]].sum())
         logger.info(f"{date}: {summ} руб.")
