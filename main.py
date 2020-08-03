@@ -1,4 +1,5 @@
 import logging
+import math
 import warnings
 from pathlib import Path
 
@@ -35,7 +36,11 @@ def main(path: str, nd: bool, log_level: bool):
 
     logger.info("Сбор данных...")
     receipt = utils.collect_data(source_path)
-    receipt = receipt[["name", "quantity", "price", "sum"]]
+    receipt = receipt[["date", "name", "quantity", "price", "sum"]]
+
+    for date in receipt["date"].unique():
+        summ = math.ceil(receipt.loc[receipt["date"] == date, ["sum"]].sum())
+        logger.info(f"{date}: {summ} руб.")
 
     logger.info("Сортировка покупок...")
     categories = utils.sort_purchases(receipt)
