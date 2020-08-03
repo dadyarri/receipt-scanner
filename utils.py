@@ -1,15 +1,17 @@
 import logging
 import os
+from datetime import date
 from math import ceil
 from pathlib import Path
+from pprint import pprint
 
 import pandas as pd
 import yaml
 from PIL import Image
+from matplotlib import pyplot as plt
 from pyzbar.pyzbar import decode
 
 from ftd import FTD
-from matplotlib import pyplot as plt
 
 
 def scan_qr(img: Image):
@@ -103,8 +105,11 @@ def collect_data(path: Path) -> pd.DataFrame:
     if frames:
         receipt = pd.concat(frames)
         receipt["sum"] = receipt["price"] * receipt["quantity"]
+        receipt["date"] = str(date.today())
     else:
-        receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
+        receipt = pd.DataFrame(
+            columns=["date", "name", "quantity", "price", "sum", "category",],
+        )
 
     for file in path.rglob("*.png"):
         img = Image.open(file)

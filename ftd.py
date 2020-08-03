@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import requests
 
@@ -80,10 +81,12 @@ class FTD:
         )
 
         receipt = []
-
+        bill = query.json()["document"]["receipt"]
+        date = datetime.strptime(bill["dateTime"], "%Y-%m-%dT%H:%M:%S").date()
         if query.status_code == 200:
-            for item in query.json()["document"]["receipt"]["items"]:
+            for item in bill["items"]:
                 item["price"] /= 100
                 item["sum"] /= 100
+                item["date"] = date
                 receipt.append(item)
         return receipt
