@@ -99,13 +99,13 @@ def collect_data(path: Path) -> pd.DataFrame:
     ftd = FTD(os.getenv("phone"), os.getenv("password"))
 
     frames = [
-        pd.read_csv(file, names=["name", "quantity", "price"])
+        pd.read_csv(file, names=["date", "name", "quantity", "price"])
         for file in path.rglob("*.csv")
     ]
     if frames:
         receipt = pd.concat(frames)
         receipt["sum"] = receipt["price"] * receipt["quantity"]
-        receipt["date"] = str(date.today())
+        receipt["date"] = receipt["date"].fillna(value=str(date.today()))
     else:
         receipt = pd.DataFrame(
             columns=["date", "name", "quantity", "price", "sum", "category",],
