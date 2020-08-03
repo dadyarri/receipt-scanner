@@ -78,7 +78,7 @@ def main(path: str, nd: bool, log_level: bool):
                 stralign="center",
             )
         )
-    if not nd:
+    if not nd and not receipt.dropna().empty:
         logger.info("Построение диаграммы...")
 
         text_of_summ = utils.get_text_of_summ(
@@ -97,3 +97,4 @@ if __name__ == "__main__":
         main()
     except Exception as err:
         logger.error(f"\n\t{utils.get_class_name(err)}: {err}")
+
