@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="receipt-scanner",
-    version="4.0",
+    version="4.1",
     packages=find_packages(),
     package_data={"": ["*.yml"]},
     install_requires=[
@@ -17,12 +17,11 @@ setup(
         "matplotlib",
         "pandas",
         "tabulate",
-        "click",
     ],
     python_requires=">=3.8",
     entry_points="""
         [console_scripts]
-        rc=main:main
+        rec-scan=rs.main:main
     """,
     author="dadyarri",
     author_email="dadyarri@gmail.com",
