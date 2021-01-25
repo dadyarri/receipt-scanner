@@ -4,6 +4,7 @@ from datetime import date
 from math import ceil
 from pathlib import Path
 from pprint import pprint
+import time
 
 import pandas as pd
 import yaml
@@ -30,33 +31,6 @@ def scan_qr(img: Image):
         logger.debug(f"Расшифрованный QR-код: {decoded}")
         return decoded
     return ""
-
-
-def parse_qr(data: str) -> dict:
-    """
-    Приводит данные с QR-кода в читаемый формат
-    Args:
-        data: Данные с QR-кода
-
-    Returns:
-        dict: Читаемый формат
-    """
-    receipt_data = dict(
-        [tuple(j.replace("\n", "").split("=")) for j in data.split("&")]
-    )
-    receipt_data["s"] = receipt_data["s"].replace(".", "")
-
-    keys = {
-        "t": "datetime",
-        "s": "summ",
-        "fn": "fiscal_number",
-        "i": "fiscal_doc",
-        "fp": "fiscal_sign",
-        "n": "receipt_type",
-    }
-
-    receipt_data = dict((keys[key], value) for (key, value) in receipt_data.items())
-    return receipt_data
 
 
 def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
@@ -96,7 +70,8 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 def collect_data(path: Path) -> pd.DataFrame:
 
     logger = logging.getLogger("rc")
-    ftd = FTD(os.getenv("phone"), os.getenv("password"))
+    ftd = FTD(os.getenv("keys_path"))
+    ftd.refresh_session_keys()
 
     frames = [
         pd.read_csv(file, names=["date", "name", "quantity", "price"])
@@ -114,14 +89,12 @@ def collect_data(path: Path) -> pd.DataFrame:
     for file in path.rglob("*.png"):
         img = Image.open(file)
         if qr := scan_qr(img):
-            data = parse_qr(qr)
-            if ftd.is_receipt_exists(**data):
-                if r := ftd.get_full_data_of_receipt(**data):
-                    receipt = receipt.append(r, ignore_index=True)
-                else:
-                    logger.warning(f"Данные по чеку {file} не пришли")
+            receipt_id = ftd.register_receipt(qr)
+            time.sleep(5)
+            if r := ftd.get_full_data_of_receipt(receipt_id):
+                receipt = receipt.append(r, ignore_index=True)
             else:
-                logger.warning(f"Чек {file} не существует")
+                logger.warning(f"Данные по чеку {file} не пришли")
         else:
             logger.warning(f"Невозможно прочесть {file}")
     return receipt
