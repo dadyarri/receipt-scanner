@@ -2,36 +2,26 @@ import logging
 import math
 import warnings
 from pathlib import Path
+import argparse
 
-import click
 from tabulate import tabulate
 
-import rs.utils
-import rs.logger
+from rs import utils
+from rs import logger
 
 ########################
 # receipt-scanner v4.0 (c) 2020-2021 dadyarri
 # MIT License
 ########################
 
+parser = argparse.ArgumentParser(description="Сканер кассовых чеков")
 
-@click.command()
-@click.option(
-    "-p",
-    "--path",
-    type=click.Path(exists=True),
-    default=".",
-    help="Относительный путь до папки с данными",
-)
-@click.option(
-    "--nd", "--no-diagram", default=False, is_flag=True, help="Не строить диаграмму"
-)
-@click.option("-l", "--log-level", default="INFO", help="Уровень логгирования")
-def main(path: str, nd: bool, log_level: bool):
 
+def handle(path, np):
+    
     logger = logging.getLogger("rc")
-    logger.setLevel(log_level)
-
+    logger.setLevel(level="DEBUG")
+    
     source_path = Path(path)
 
     logger.info("Сбор данных...")
@@ -78,7 +68,7 @@ def main(path: str, nd: bool, log_level: bool):
                 stralign="center",
             )
         )
-    if not nd and not receipt.dropna().empty:
+    if not np and not receipt.dropna().empty:
         logger.info("Построение диаграммы...")
 
         text_of_summ = utils.get_text_of_summ(
@@ -88,13 +78,20 @@ def main(path: str, nd: bool, log_level: bool):
         utils.build_diagram(text_of_summ, categories).show()
 
 
-if __name__ == "__main__":
+def main():
+
+    logger = logging.getLogger("rc")
+
+    parser.add_argument("-p", "--path", type=str, help="Путь до папки с чеками", default=".")
+    parser.add_argument("--np", "--no-plot", action="store_true", help="Не рисовать диаграмму")
+
+    args = parser.parse_args()
 
     warnings.simplefilter(action="ignore", category=UserWarning)
-    logger = logger.init()
-    
+
+    logger.debug(args)    
     try:
-        main()
+        handle(args.path, args.np)
     except Exception as err:
         logger.error(f"\n\t{utils.get_class_name(err)}: {err}")
 
