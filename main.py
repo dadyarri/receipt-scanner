@@ -10,7 +10,7 @@ import utils
 import logger
 
 ########################
-# receipt-scanner v3.0 (c) 2020 dadyarri
+# receipt-scanner v4.0 (c) 2020-2021 dadyarri
 # MIT License
 ########################
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     warnings.simplefilter(action="ignore", category=UserWarning)
     logger = logger.init()
-
+    
     try:
         main()
     except Exception as err:
