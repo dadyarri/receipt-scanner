@@ -1,88 +1,102 @@
+from datetime import datetime
+import json
+import logging
+from pathlib import Path
+import yaml
+
 import requests
+
+logger = logging.getLogger("rc")
 
 
 class FTD:
     """Реализация подключения к API Налоговой службы
 
     Args:
-        phone: Номер телефона для авторизации в сервисах ФНС
-        password: Пароль для авторизации в сервисах ФНС
+        keys_path: путь до файла с ключами
     """
 
-    def __init__(self, phone: str, password: str):
+    def __init__(self, path: str):
         """
         Инициализация API.
         """
-        self.phone = phone
-        self.password = password
+        self.path = Path(path)
+        self.url = "https://irkkt-mobile.nalog.ru:8888"
 
-    def is_receipt_exists(
+    def get_session_keys(self) -> dict:
+        """Получает токены сессии из файла."""
+        with open(self.path, "r") as keys_file:
+            keys = yaml.safe_load(keys_file)
+
+        return keys
+
+    def update_session_keys(self, keys):
+        """Обновляет токены сессии в файле."""
+        with open(self.path, "w") as keys_file:
+            yaml.dump(keys, keys_file)
+
+    def refresh_session_keys(self):
+        """Получает новые ключи сессии."""
+        headers = self.get_session_keys()
+        headers.update({"Device-OS": "Android", "Device-Id": "Samsung", "Content-Type": "application/json"})
+        query = requests.post(f"{self.url}/v2/mobile/users/refresh", headers=headers)
+        if query.text == "":
+            return
+        session_keys = self.get_session_keys()
+        session_keys.update(query.json())
+        self.update_session_keys(session_keys)
+        return self.get_session_keys()
+
+
+    def register_receipt(
         self,
-        fiscal_number: str,
-        receipt_type: str,
-        fiscal_doc: str,
-        fiscal_sign: str,
-        datetime: str,
-        summ: str,
+        qr_data: str,
     ):
         """
-        Проверка существования чека
+        Регистрирует чек в системе ФНС
 
         Args:
-            fiscal_number: Фискальный номер. 16-значное число
-            fiscal_doc: Фискальный документ: Число до 10 знаков
-            fiscal_sign: Фискальный признак документа: Число до 10 знаков
-            receipt_type: Вид кассового чека (1 - приход, 2 - возврат прихода)
-            datetime: Дата совершения покупки
-            summ: Сумма чека в копейках
-        """
-        exist_url = (
-            f"https://proverkacheka.nalog.ru:9999/v1/ofds/*/inns/*/fss/"
-            f"{fiscal_number}/operations/{receipt_type}/tickets/{fiscal_doc}"
-        )
-        receipt_data = {
-            "fiscalSign": fiscal_sign,
-            "date": datetime,
-            "sum": summ,
-        }
-        query = requests.get(exist_url, receipt_data, auth=(self.phone, self.password))
+            qr_data: Данные из qr-кода
 
-        if query.status_code == 204:
-            return True
-        if query.status_code == 406:
-            return False
+       """
+        url = f"{self.url}/v2/ticket"
+        receipt_data = {
+            "qr": qr_data
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "sessionId": self.get_session_keys()["sessionId"],
+        }
+        query = requests.post(url, data=json.dumps(receipt_data), headers=headers)
+
+        return query.json()["id"]
 
     def get_full_data_of_receipt(
-        self, fiscal_number: str, fiscal_doc: str, fiscal_sign: str, **_
-    ) -> list:
+        self, receipt_id: int) -> list:
         """Получение подробной информации о чеке
         Arguments:
             fiscal_number: Фискальный номер. 16-значное число
             fiscal_doc: Фискальный документ: Число до 10 знаков
             fiscal_sign: Фискальный признак документа: Число до 10 знаков
         """
-        full_url = (
-            f"https://proverkacheka.nalog.ru:9999/v1/inns/*/kkts/*/fss"
-            f"/{fiscal_number}/tickets/{fiscal_doc}?fiscalSign={fiscal_sign}&sendToEmail=no"
-        )
+        full_url = f"{self.url}/v2/tickets/{receipt_id}"
 
         query = requests.get(
             full_url,
-            headers={"device-id": "", "device-os": ""},
-            auth=(self.phone, self.password),
+            headers={"sessionId": self.get_session_keys()["sessionId"], "device-id": "Android", "device-os": "Samsung"},
         )
+        logger.debug(query)
+        logger.debug(query.text)
+        logger.debug(query.url)
+        logger.debug(receipt_id)
 
-        if query.status_code == 406:
-            receipt = []
-        elif query.status_code == 202:
-            print("Существование чека не было проверено")
-            receipt = []
-        elif query.status_code == 200:
-            receipt = []
-            for item in query.json()["document"]["receipt"]["items"]:
+        receipt = []
+        bill = query.json()["ticket"]["document"]["receipt"]
+        date = datetime.strptime(query.json()["operation"]["date"], "%Y-%m-%dT%H:%M").date()
+        if query.status_code == 200:
+            for item in bill["items"]:
                 item["price"] /= 100
                 item["sum"] /= 100
+                item["date"] = date
                 receipt.append(item)
-        else:
-            receipt = []
         return receipt

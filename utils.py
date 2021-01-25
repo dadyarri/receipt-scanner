@@ -1,14 +1,18 @@
+import logging
 import os
+from datetime import date
 from math import ceil
 from pathlib import Path
+from pprint import pprint
+import time
 
 import pandas as pd
 import yaml
 from PIL import Image
+from matplotlib import pyplot as plt
 from pyzbar.pyzbar import decode
 
 from ftd import FTD
-from matplotlib import pyplot as plt
 
 
 def scan_qr(img: Image):
@@ -20,10 +24,12 @@ def scan_qr(img: Image):
     Returns:
         str: Расшифрованный текст
     """
-
+    logger = logging.getLogger("rc")
     qr = decode(img)
     if qr:
-        return qr[0].data.decode("UTF-8")
+        decoded = qr[0].data.decode("UTF-8")
+        logger.debug(f"Расшифрованный QR-код: {decoded}")
+        return decoded
     return ""
 
 
@@ -37,111 +43,64 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
         DataFrame: Упорядоченный по сумме трат датафрейм с категориями
 
     """
+    logger = logging.getLogger("rc")
     categories = pd.DataFrame(columns=["category", "value"])
     products = yaml.full_load(open("products.yml", "r"))
     for category, filters in products.items():
         for fltr in filters[:-1]:
             slc = receipt.name.str.contains(fltr, regex=True, na=False, case=False)
             if slc.any():
+                logger.debug(f'Найдены элементы, подходящие фильтру "{fltr}"')
                 if categories[categories["category"].str.contains(category)].empty:
+                    logger.debug(f'Создана категория "{category.capitalize()}"')
                     categories = categories.append(
                         {"category": category, "value": 0.0}, ignore_index=True
                     )
                 categories.loc[categories["category"] == category, "value"] += ceil(
                     receipt[slc]["sum"].sum()
                 )
+                logger.debug(
+                    f"Сумма по категории \"{category}\": {receipt[slc]['sum'].sum()} "
+                    f"руб."
+                )
                 receipt.loc[slc, "category"] = category
     return categories.sort_values(by="value")
 
 
-def get_previous_date(week: int, month: int, root_dir: str = "source") -> str:
-    if n := week - 1:
-        return f"{n}-{month}"
-    path = Path("source")
-    weeks = []
-    for p in path.glob(f"*-{month - 1}"):
-        weeks.append(int(str(p).replace(f"{root_dir}/", "").split("-")[0]))
-    return f"{max(weeks)}-{month - 1}"
-
-
-def _get_name_of_month(number: int) -> str:
-    import locale
-    import calendar
-
-    locale.setlocale(locale.LC_ALL, "ru_RU.UTF-8")
-    return calendar.month_name[number]
-
-
 def collect_data(path: Path) -> pd.DataFrame:
 
-    decoded = []
-    files = [f for f in path.rglob("*.png")]
-
-    for file in path.rglob("*.jpg"):
-        img = Image.open(file)
-        img.save(str(file)[:-3] + "png")
-        file.unlink()
-
-    for file in files:
-        img = Image.open(file)
-        if qr := scan_qr(img):
-            decoded.append(qr)
-        else:
-            print(f"Невозможно прочесть {file}")
+    logger = logging.getLogger("rc")
+    ftd = FTD(os.getenv("keys_path"))
+    ftd.refresh_session_keys()
 
     frames = [
-        pd.read_csv(file, names=["name", "quantity", "price"])
+        pd.read_csv(file, names=["date", "name", "quantity", "price"])
         for file in path.rglob("*.csv")
     ]
     if frames:
         receipt = pd.concat(frames)
         receipt["sum"] = receipt["price"] * receipt["quantity"]
+        receipt["date"] = receipt["date"].fillna(value=str(date.today()))
     else:
-        receipt = pd.DataFrame(columns=["name", "quantity", "price", "sum", "category"])
+        receipt = pd.DataFrame(
+            columns=["date", "name", "quantity", "price", "sum", "category",],
+        )
 
-    if decoded:
-
-        nalog = FTD(os.environ["phone"], os.environ["password"])
-
-        for ind, rec in enumerate(decoded):
-            receipt_data = dict(
-                [tuple(j.replace("\n", "").split("=")) for j in rec.split("&")]
-            )
-            receipt_data["s"] = receipt_data["s"].replace(".", "")
-
-            keys = {
-                "t": "datetime",
-                "s": "summ",
-                "fn": "fiscal_number",
-                "i": "fiscal_doc",
-                "fp": "fiscal_sign",
-                "n": "receipt_type",
-            }
-
-            receipt_data = dict(
-                (keys[key], value) for (key, value) in receipt_data.items()
-            )
-
-            if nalog.is_receipt_exists(**receipt_data):
-                r = nalog.get_full_data_of_receipt(**receipt_data)
-                if r:
-                    receipt = receipt.append(r, ignore_index=True)
-                else:
-                    print(f"Чек {files[ind]} не найден")
+    for file in path.rglob("*.png"):
+        img = Image.open(file)
+        if qr := scan_qr(img):
+            receipt_id = ftd.register_receipt(qr)
+            time.sleep(5)
+            if r := ftd.get_full_data_of_receipt(receipt_id):
+                receipt = receipt.append(r, ignore_index=True)
+            else:
+                logger.warning(f"Данные по чеку {file} не пришли")
+        else:
+            logger.warning(f"Невозможно прочесть {file}")
     return receipt
 
 
-def get_difference_of_dataframes(
-    old_frame: pd.DataFrame, new_frame: pd.DataFrame
-) -> pd.DataFrame:
-    df = old_frame.merge(new_frame, "left", on="category")
-    df.columns = ["category", "old", "new"]
-    df = df.dropna()
-    df["delta"] = df["new"] - df["old"]
-    return df
-
-
-def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
+def _get_legend(categories: pd.DataFrame) -> (list, list):
     legend = []
     colors = []
     products = yaml.full_load(open("products.yml", "r"))
@@ -149,19 +108,8 @@ def _get_legend(categories: pd.DataFrame, diff: pd.DataFrame) -> (list, list):
         title = value.category
         summ = r" $\bf{" + str(round(value.value)) + "  руб.}$"
         percentage = round(value.value / sum(categories.value) * 100, 2)
-        item = diff.loc[diff["category"] == title]
-        if len(item.index) > 0:
-            d = int(item["delta"].item())
-            if d > 0:
-                delta = f" +{d} руб."
-            elif d < 0:
-                delta = f" {d} руб."
-            else:
-                delta = ""
-        else:
-            delta = ""
 
-        legend.append(f"{title.capitalize()} {summ} ({percentage}%){delta}")
+        legend.append(f"{title.capitalize()} {summ} ({percentage}%)")
         colors.append(products[title][-1])
     return legend, colors
 
@@ -174,13 +122,9 @@ def get_text_of_summ(receipt_summ, cat_summ):
 
 
 def build_diagram(
-    week: int,
-    month: int,
-    text_of_summ: str,
-    categories: pd.DataFrame,
-    diff: pd.DataFrame,
+    text_of_summ: str, categories: pd.DataFrame,
 ):
-    legend, colors = _get_legend(categories, diff)
+    legend, colors = _get_legend(categories)
 
     fig1, ax1 = plt.subplots()
     ax1.pie(
@@ -199,9 +143,7 @@ def build_diagram(
     fig.set_size_inches(8, 8)
     fig.gca().add_artist(centre_circle)
 
-    month_word = _get_name_of_month(month)
-
-    plt.title(label=f"Покупки по категориям в {week} неделю {month_word}", loc="center")
+    plt.title(label=f"Покупки по категориям", loc="center")
     plt.text(
         x=1, y=1.5, s=text_of_summ,
     )
@@ -212,3 +154,7 @@ def build_diagram(
     plt.tight_layout()
 
     return plt
+
+
+def get_class_name(err):
+    return type(err).__name__
