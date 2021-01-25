@@ -12,7 +12,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from pyzbar.pyzbar import decode
 
-from ftd import FTD
+from rs.ftd import FTD
 
 
 def scan_qr(img: Image):

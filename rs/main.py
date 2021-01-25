@@ -6,8 +6,8 @@ from pathlib import Path
 import click
 from tabulate import tabulate
 
-import utils
-import logger
+import rs.utils
+import rs.logger
 
 ########################
 # receipt-scanner v4.0 (c) 2020-2021 dadyarri

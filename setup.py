@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="receipt-scanner",
-    version="3.0",
+    version="4.0",
     packages=find_packages(),
     package_data={"": ["*.yml"]},
     install_requires=[
