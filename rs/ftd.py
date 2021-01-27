@@ -37,15 +37,17 @@ class FTD:
 
     def refresh_session_keys(self):
         """Получает новые ключи сессии."""
-        headers = self.get_session_keys()
-        headers.update({"Device-OS": "Android", "Device-Id": "Samsung", "Content-Type": "application/json"})
-        query = requests.post(f"{self.url}/v2/mobile/users/refresh", headers=headers)
-        if query.text == "":
-            return
-        session_keys = self.get_session_keys()
-        session_keys.update(query.json())
-        self.update_session_keys(session_keys)
-        return self.get_session_keys()
+        data = self.get_session_keys()
+        data.pop("sessionId")
+        headers = {"Device-OS": "Android", "Device-Id": "Samsung", "Content-Type": "application/json"}
+        
+        query = requests.post(f"{self.url}/v2/mobile/users/refresh", data=json.dumps(data), headers=headers)
+
+        data = self.get_session_keys()
+        data.update(query.json())
+        self.update_session_keys(data)
+        
+        return data
 
 
     def register_receipt(
