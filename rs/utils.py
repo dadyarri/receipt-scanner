@@ -45,7 +45,7 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
     """
     logger = logging.getLogger("rc")
     categories = pd.DataFrame(columns=["category", "value"])
-    products = yaml.full_load(open("rs/products.yml", "r"))
+    products = yaml.full_load(open(Path(__file__).parent / "products.yml", "r"))
     for category, filters in products.items():
         for fltr in filters[:-1]:
             slc = receipt.name.str.contains(fltr, regex=True, na=False, case=False)
@@ -70,7 +70,7 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 def collect_data(path: Path) -> pd.DataFrame:
 
     logger = logging.getLogger("rc")
-    ftd = FTD("rs/keys.yml")
+    ftd = FTD(Path(__file__).parent / "keys.yml")
     ftd.refresh_session_keys()
 
     frames = [
@@ -109,7 +109,7 @@ def collect_data(path: Path) -> pd.DataFrame:
 def _get_legend(categories: pd.DataFrame) -> (list, list):
     legend = []
     colors = []
-    products = yaml.full_load(open("rs/products.yml", "r"))
+    products = yaml.full_load(open(Path(__file__).parent / "products.yml", "r"))
     for index, value in categories.iterrows():
         title = value.category
         summ = r" $\bf{" + str(round(value.value)) + "  руб.}$"
