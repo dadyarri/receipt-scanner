@@ -81,6 +81,7 @@ def handle(path, np):
 def main():
 
     logger = logging.getLogger("rc")
+    logging.basicConfig(handlers=[logging.StreamHandler()])
 
     parser.add_argument("-p", "--path", type=str, help="Путь до папки с чеками", default=".")
     parser.add_argument("--np", "--no-plot", action="store_true", help="Не рисовать диаграмму")
@@ -94,4 +95,3 @@ def main():
         handle(args.path, args.np)
     except Exception as err:
         logger.error(f"\n\t{utils.get_class_name(err)}: {err}")
-
