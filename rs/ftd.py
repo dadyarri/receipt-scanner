@@ -2,9 +2,10 @@ from datetime import datetime
 import json
 import logging
 from pathlib import Path
-import yaml
+import time
 
 import requests
+import yaml
 
 logger = logging.getLogger("rc")
 
@@ -76,7 +77,12 @@ class FTD:
         }
         query = requests.post(url, data=json.dumps(receipt_data), headers=headers)
 
-        return query.json()["id"]
+        response = query.json()
+
+        if response["status"] in [0, 1, 3]:
+            time.sleep(5)
+
+        return response["id"]
 
     def get_full_data_of_receipt(self, receipt_id: int) -> list:
         """Получение подробной информации о чеке

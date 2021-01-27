@@ -97,7 +97,6 @@ def collect_data(path: Path) -> pd.DataFrame:
         img = Image.open(file)
         if qr := scan_qr(img):
             receipt_id = ftd.register_receipt(qr)
-            time.sleep(5)
             if r := ftd.get_full_data_of_receipt(receipt_id):
                 receipt = receipt.append(r, ignore_index=True)
             else:
