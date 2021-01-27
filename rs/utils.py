@@ -70,7 +70,7 @@ def sort_purchases(receipt: pd.DataFrame) -> pd.DataFrame:
 def collect_data(path: Path) -> pd.DataFrame:
 
     logger = logging.getLogger("rc")
-    ftd = FTD(os.getenv("keys_path"))
+    ftd = FTD("rs/keys.yml")
     ftd.refresh_session_keys()
 
     frames = [
