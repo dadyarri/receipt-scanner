@@ -18,10 +18,10 @@ parser = argparse.ArgumentParser(description="Сканер кассовых че
 
 
 def handle(path, np):
-    
+
     logger = logging.getLogger("rc")
     logger.setLevel(level="DEBUG")
-    
+
     source_path = Path(path)
 
     logger.info("Сбор данных...")
@@ -83,14 +83,18 @@ def main():
     logger = logging.getLogger("rc")
     logging.basicConfig(handlers=[logging.StreamHandler()])
 
-    parser.add_argument("-p", "--path", type=str, help="Путь до папки с чеками", default=".")
-    parser.add_argument("--np", "--no-plot", action="store_true", help="Не рисовать диаграмму")
+    parser.add_argument(
+        "-p", "--path", type=str, help="Путь до папки с чеками", default="."
+    )
+    parser.add_argument(
+        "--np", "--no-plot", action="store_true", help="Не рисовать диаграмму"
+    )
 
     args = parser.parse_args()
 
     warnings.simplefilter(action="ignore", category=UserWarning)
 
-    logger.debug(args)    
+    logger.debug(args)
     try:
         handle(args.path, args.np)
     except Exception as err:

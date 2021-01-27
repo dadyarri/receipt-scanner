@@ -83,7 +83,14 @@ def collect_data(path: Path) -> pd.DataFrame:
         receipt["date"] = receipt["date"].fillna(value=str(date.today()))
     else:
         receipt = pd.DataFrame(
-            columns=["date", "name", "quantity", "price", "sum", "category",],
+            columns=[
+                "date",
+                "name",
+                "quantity",
+                "price",
+                "sum",
+                "category",
+            ],
         )
 
     for file in path.rglob("*.png"):
@@ -122,7 +129,8 @@ def get_text_of_summ(receipt_summ, cat_summ):
 
 
 def build_diagram(
-    text_of_summ: str, categories: pd.DataFrame,
+    text_of_summ: str,
+    categories: pd.DataFrame,
 ):
     legend, colors = _get_legend(categories)
 
@@ -145,10 +153,13 @@ def build_diagram(
 
     plt.title(label=f"Покупки по категориям", loc="center")
     plt.text(
-        x=1, y=1.5, s=text_of_summ,
+        x=1,
+        y=1.5,
+        s=text_of_summ,
     )
     plt.legend(
-        labels=legend, bbox_to_anchor=(1, 0.8),
+        labels=legend,
+        bbox_to_anchor=(1, 0.8),
     )
     plt.axis("equal")
     plt.tight_layout()

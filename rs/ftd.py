@@ -39,16 +39,23 @@ class FTD:
         """Получает новые ключи сессии."""
         data = self.get_session_keys()
         data.pop("sessionId")
-        headers = {"Device-OS": "Android", "Device-Id": "Samsung", "Content-Type": "application/json"}
-        
-        query = requests.post(f"{self.url}/v2/mobile/users/refresh", data=json.dumps(data), headers=headers)
+        headers = {
+            "Device-OS": "Android",
+            "Device-Id": "Samsung",
+            "Content-Type": "application/json",
+        }
+
+        query = requests.post(
+            f"{self.url}/v2/mobile/users/refresh",
+            data=json.dumps(data),
+            headers=headers,
+        )
 
         data = self.get_session_keys()
         data.update(query.json())
         self.update_session_keys(data)
-        
-        return data
 
+        return data
 
     def register_receipt(
         self,
@@ -60,11 +67,9 @@ class FTD:
         Args:
             qr_data: Данные из qr-кода
 
-       """
+        """
         url = f"{self.url}/v2/ticket"
-        receipt_data = {
-            "qr": qr_data
-        }
+        receipt_data = {"qr": qr_data}
         headers = {
             "Content-Type": "application/json",
             "sessionId": self.get_session_keys()["sessionId"],
@@ -73,8 +78,7 @@ class FTD:
 
         return query.json()["id"]
 
-    def get_full_data_of_receipt(
-        self, receipt_id: int) -> list:
+    def get_full_data_of_receipt(self, receipt_id: int) -> list:
         """Получение подробной информации о чеке
         Arguments:
             fiscal_number: Фискальный номер. 16-значное число
@@ -85,7 +89,11 @@ class FTD:
 
         query = requests.get(
             full_url,
-            headers={"sessionId": self.get_session_keys()["sessionId"], "device-id": "Android", "device-os": "Samsung"},
+            headers={
+                "sessionId": self.get_session_keys()["sessionId"],
+                "device-id": "Android",
+                "device-os": "Samsung",
+            },
         )
         logger.debug(query)
         logger.debug(query.text)
@@ -94,7 +102,9 @@ class FTD:
 
         receipt = []
         bill = query.json()["ticket"]["document"]["receipt"]
-        date = datetime.strptime(query.json()["operation"]["date"], "%Y-%m-%dT%H:%M").date()
+        date = datetime.strptime(
+            query.json()["operation"]["date"], "%Y-%m-%dT%H:%M"
+        ).date()
         if query.status_code == 200:
             for item in bill["items"]:
                 item["price"] /= 100
